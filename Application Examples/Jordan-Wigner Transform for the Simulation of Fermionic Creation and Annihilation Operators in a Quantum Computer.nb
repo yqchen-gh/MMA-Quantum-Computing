@@ -1,0 +1,4825 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[    174705,       4816]
+NotebookOptionsPosition[    113993,       3463]
+NotebookOutlinePosition[    168944,       4626]
+CellTagsIndexPosition[    168901,       4623]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["\<\
+Jordan-Wigner Transform: Simulation of Fermionic Creation and Annihilation \
+Operators in a Quantum Computer\
+\>", "Title",
+ CellChangeTimes->{{3.450086506453125*^9, 3.450086518203125*^9}, {
+   3.450355366484375*^9, 3.450355424234375*^9}, {3.450375396375*^9, 
+   3.4503753969375*^9}, {3.47996728840625*^9, 3.4799673370625*^9}, {
+   3.47996744728125*^9, 3.47996745025*^9}, 3.47996776209375*^9, {
+   3.479967802796875*^9, 3.479967803234375*^9}, {3.480034309015625*^9, 
+   3.480034310796875*^9}, 3.4800936606584115`*^9, {3.4815467054747334`*^9, 
+   3.4815467627124047`*^9}, 3.481547057303466*^9, {3.481548502057789*^9, 
+   3.4815485049172187`*^9}}],
+
+Cell[TextData[{
+ "by Jos\[EAcute] Luis G\[OAcute]mez-Mu\[NTilde]oz\n",
+ ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/"], None},
+  ButtonNote->"http://homepage.cem.itesm.mx/lgomez/quantum/"],
+ "\njose.luis.gomez@itesm.mx  "
+}], "Text",
+ CellChangeTimes->{{3.45008652390625*^9, 3.45008658784375*^9}, {
+   3.450086927796875*^9, 3.450086927796875*^9}, 3.450354855359375*^9, 
+   3.450445823609375*^9}],
+
+Cell[CellGroupData[{
+
+Cell["Introduction", "Section",
+ CellChangeTimes->{{3.45035557515625*^9, 3.450355577640625*^9}}],
+
+Cell["\<\
+The Jordan-Wigner transform allows us to take a system of interacting \
+Fermions (second quantization, occupation notation), and map it into an \
+equivalent model of interacting spins, which can then, in principle, be \
+simulated using standard techniques in a quantum computer. This enables to \
+use quantum computers to simulate systems of interacting Fermions, as \
+explained by Michael A. Nielsen, \"The Fermionic canonical relations and the \
+Jordan-Wigner transform\", 2005, published in his personal blog. Here is a \
+copy of that document:   \
+\>", "Text",
+ CellChangeTimes->{
+  3.45035556646875*^9, {3.45035561096875*^9, 3.4503556131875*^9}, 
+   3.450375143921875*^9, {3.450375386328125*^9, 3.450375391515625*^9}, {
+   3.452533991829424*^9, 3.452533997032482*^9}, {3.479967413828125*^9, 
+   3.479967429265625*^9}, {3.479967464875*^9, 3.47996774528125*^9}, 
+   3.48154679310478*^9, {3.4815469771295385`*^9, 3.481546994504983*^9}, {
+   3.4815484832918034`*^9, 3.481548519198743*^9}}],
+
+Cell[TextData[ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/\
+NielsenJordanWigner.pdf",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"],
+    None},
+ ButtonNote->
+  "http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]], \
+"Text",
+ CellChangeTimes->{{3.481547003473963*^9, 3.481547014474244*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["NOTE: ", "Section",
+ CellChangeTimes->{{3.4815472221045594`*^9, 3.4815472258546553`*^9}}],
+
+Cell[TextData[{
+ "This ",
+ StyleBox["could",
+  FontWeight->"Bold"],
+ " be an efficient implementation of fermionic operators in a ",
+ StyleBox["quantum computer",
+  FontWeight->"Bold"],
+ ". However, in this \"normal\" computer, these calculations are ",
+ StyleBox["very",
+  FontWeight->"Bold"],
+ " slow. If you need faster calculations with these operators, and you do not \
+care about their possible implementation in a quantum computer, these \
+documents might be useful for you:\n\n",
+ ButtonBox["Algebra of operators and commutators. Mathematica file: \
+http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.nb",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.nb"], None},
+  ButtonNote->"http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.nb"],
+ "\n\n",
+ ButtonBox["Algebra of operators and commutators. PDF file: \
+http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.pdf"], None},
+  ButtonNote->"http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.pdf"],
+ "\n  "
+}], "Text",
+ CellChangeTimes->{{3.481547237870504*^9, 3.481547286558627*^9}, {
+  3.481547346403143*^9, 3.4815474704047303`*^9}, {3.4815475388431063`*^9, 
+  3.481547588828121*^9}, {3.4815476588928676`*^9, 3.481547770636539*^9}, {
+  3.4815478089991055`*^9, 3.4815478126400337`*^9}, {3.4815497044796705`*^9, 
+  3.4815497064015703`*^9}, {3.481551786310977*^9, 3.481551795310862*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Load the Package", "Section",
+ CellChangeTimes->{{3.450086595125*^9, 3.45008660265625*^9}}],
+
+Cell[TextData[{
+ "First load the Quantum`Computing` package. Write:\n\
+Needs[\"Quantum`Computing`\"];\nthen press at the same time the keys \
+\[ShiftKey]-\[EnterKey] to evaluate. ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " will load the package. "
+}], "Text",
+ CellChangeTimes->{{3.45008660775*^9, 3.450086613046875*^9}, 
+   3.450086744625*^9, {3.452534014969753*^9, 3.4525340229696503`*^9}, 
+   3.483807110383093*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<Quantum`Computing`\>\"", "]"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.450086747640625*^9, 3.450086763046875*^9}, 
+   3.450086805609375*^9, 3.4525340329382725`*^9, 3.483807105664071*^9}],
+
+Cell[BoxData["\<\"Quantum`Computing` Version 2.2.0. (June 2010) \\nA \
+Mathematica package for Quantum Computing in Dirac bra-ket notation and \
+plotting of quantum circuits\\nby Jos\[EAcute] Luis \
+G\[OAcute]mez-Mu\[NTilde]oz\\n\\nExecute SetComputingAliases[] in order to \
+use the keyboard to enter quantum objects in Dirac's \
+notation\\nSetComputingAliases[] must be executed again in each new notebook \
+that is created\"\>"], "Output",
+ CellChangeTimes->{3.4862968530626836`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "In order to use the keyboard to enter quantum objects write:\n\
+SetComputingAliases[ ];\nthen press at the same time the keys \[ShiftKey]-\
+\[EnterKey] to evaluate. The semicolon prevents ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " from printing the help message. Remember that SetComputingAliases[ ] must \
+be evaluated again in each new notebook:"
+}], "Text",
+ CellChangeTimes->{
+  3.450086782515625*^9, {3.452534055094239*^9, 3.4525340698909245`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"SetComputingAliases", "[", "]"}], ";"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.45008680878125*^9, 3.450086837859375*^9}, {
+  3.4525340379694586`*^9, 3.4525340400788064`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Annihilation Operator in terms of Pauli Operators", "Section",
+ CellChangeTimes->{{3.4503754213125*^9, 3.450375422921875*^9}, {
+  3.480019190140625*^9, 3.480019192859375*^9}, {3.480019248859375*^9, 
+  3.480019284703125*^9}, {3.4800941114023685`*^9, 3.4800941157147307`*^9}, {
+  3.480094908881215*^9, 3.480094910099903*^9}}],
+
+Cell[TextData[{
+ "This is the definition of a fermionic annihilation operator in terms of \
+Pauli operators and the operator ",
+ Cell[BoxData[
+  TagBox[
+   RowBox[{"\[VerticalSeparator]", 
+    TagBox["0",
+     Quantum`Notation`zz080KetArgs,
+     BaseStyle->{ShowSyntaxStyles -> True},
+     Editable->True,
+     Selectable->True], "\[RightAngleBracket]"}],
+   Quantum`Notation`zz080Ket,
+   BaseStyle->{ShowSyntaxStyles -> False},
+   Editable->False,
+   Selectable->False]]],
+ "\[CenterDot]",
+ Cell[BoxData[
+  TagBox[
+   RowBox[{"\[LeftAngleBracket]", 
+    TagBox["1",
+     Quantum`Notation`zz080BraArgs,
+     BaseStyle->{ShowSyntaxStyles -> True},
+     Editable->True,
+     Selectable->True], "\[VerticalSeparator]"}],
+   Quantum`Notation`zz080Bra,
+   BaseStyle->{ShowSyntaxStyles -> False},
+   Editable->False,
+   Selectable->False]]],
+ ".Pauli operators ",
+ Cell[BoxData[
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptCapitalZ]", ",", 
+    OverscriptBox["k", "^"]}]]]],
+ " produce the correct sign when acting on a ket (or, equivalent, produce the \
+correct commutation relations) and the operator ",
+ Cell[BoxData[
+  TagBox[
+   RowBox[{"\[VerticalSeparator]", 
+    TagBox["0",
+     Quantum`Notation`zz080KetArgs,
+     BaseStyle->{ShowSyntaxStyles -> True},
+     Editable->True,
+     Selectable->True], "\[RightAngleBracket]"}],
+   Quantum`Notation`zz080Ket,
+   BaseStyle->{ShowSyntaxStyles -> False},
+   Editable->False,
+   Selectable->False]]],
+ "\[CenterDot]",
+ Cell[BoxData[
+  TagBox[
+   RowBox[{"\[LeftAngleBracket]", 
+    TagBox["1",
+     Quantum`Notation`zz080BraArgs,
+     BaseStyle->{ShowSyntaxStyles -> True},
+     Editable->True,
+     Selectable->True], "\[VerticalSeparator]"}],
+   Quantum`Notation`zz080Bra,
+   BaseStyle->{ShowSyntaxStyles -> False},
+   Editable->False,
+   Selectable->False]]],
+ " annihilates the corresponding fermion (qubit)."
+}], "Text",
+ CellChangeTimes->{{3.4815471374617677`*^9, 3.4815471870567875`*^9}, {
+  3.4815478476585712`*^9, 3.4815479909650745`*^9}, {3.481550154954187*^9, 
+  3.4815501616730227`*^9}, {3.481563195827277*^9, 3.481563197889804*^9}, {
+  3.483807218186177*^9, 3.4838072643138337`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"nfermions", "=", "3"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"a", "[", "j_", "]"}], ":=", 
+  RowBox[{
+   RowBox[{"(", 
+    TagBox[
+     RowBox[{
+      UnderoverscriptBox["\[CircleTimes]", 
+       TagBox[
+        RowBox[{"k", "=", "1"}],
+        Quantum`Notation`zz020TPNotationini,
+        Editable->True,
+        Selectable->True], 
+       TagBox[
+        RowBox[{"j", "-", "1"}],
+        Quantum`Notation`zz020TPNotationend,
+        Editable->True,
+        Selectable->True]], 
+      TagBox[
+       SubscriptBox["\[Sigma]", 
+        RowBox[{"\[ScriptCapitalZ]", ",", 
+         OverscriptBox["k", "^"]}]],
+       Quantum`Notation`zz020TPNotationdat,
+       Editable->True,
+       Selectable->True]}],
+     Quantum`Notation`zz020TPNotation,
+     Editable->False,
+     Selectable->False], ")"}], "\[CircleTimes]", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         SubscriptBox["0", 
+          OverscriptBox["j", "^"]],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]}], "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+       TagBox[
+        SubscriptBox["1", 
+         OverscriptBox["j", "^"]],
+        Quantum`Notation`zz080BraArgs,
+        BaseStyle->{ShowSyntaxStyles -> True},
+        Editable->True,
+        Selectable->True], "\[VerticalSeparator]"}],
+      Quantum`Notation`zz080Bra,
+      BaseStyle->{ShowSyntaxStyles -> False},
+      Editable->False,
+      Selectable->False]}], ")"}], "\[CircleTimes]", 
+   RowBox[{"(", 
+    TagBox[
+     RowBox[{
+      UnderoverscriptBox["\[CircleTimes]", 
+       TagBox[
+        RowBox[{"m", "=", 
+         RowBox[{"j", "+", "1"}]}],
+        Quantum`Notation`zz020TPNotationini,
+        Editable->True,
+        Selectable->True], 
+       TagBox["nfermions",
+        Quantum`Notation`zz020TPNotationend,
+        Editable->True,
+        Selectable->True]], 
+      TagBox[
+       SubscriptBox["\[Sigma]", 
+        RowBox[{"\[ScriptZero]", ",", 
+         OverscriptBox["m", "^"]}]],
+       Quantum`Notation`zz020TPNotationdat,
+       Editable->True,
+       Selectable->True]}],
+     Quantum`Notation`zz020TPNotation,
+     Editable->False,
+     Selectable->False], ")"}]}]}]}], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.47996792065625*^9, 3.4799679450625*^9}, {
+   3.47996967653125*^9, 3.47996974946875*^9}, {3.47996978903125*^9, 
+   3.479969928328125*^9}, {3.4800108899375*^9, 3.480010894734375*^9}, {
+   3.480011408046875*^9, 3.48001145553125*^9}, {3.480016530296875*^9, 
+   3.480016540265625*^9}, {3.48002444828125*^9, 3.480024450359375*^9}, {
+   3.480280872453125*^9, 3.480280876015625*^9}, 3.4815500985315895`*^9, {
+   3.481550227798869*^9, 3.4815502513929214`*^9}}],
+
+Cell[TextData[{
+ "Each qubit represents a fermionic state. A qubit value of \"zero\" means \
+that the state is not occupied; \"one\" means the fermionic state is \
+occupied. Here the the annihilation operator a[2] annihilates the second \
+fermionic state, ",
+ Cell[BoxData[
+  SubscriptBox["1", 
+   OverscriptBox["2", "^"]]]],
+ "\[Rule]",
+ Cell[BoxData[
+  SubscriptBox["0", 
+   OverscriptBox["2", "^"]]]],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.4815472046822386`*^9, 3.4815472108542714`*^9}, {
+  3.481548004059327*^9, 3.481548156408927*^9}, {3.481548191254015*^9, 
+  3.481548209785977*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumEvaluate", "[", 
+  RowBox[{
+   RowBox[{"a", "[", "2", "]"}], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+     TagBox[
+      RowBox[{
+       SubscriptBox["1", 
+        OverscriptBox["1", "^"]], ",", 
+       SubscriptBox["1", 
+        OverscriptBox["2", "^"]], ",", 
+       SubscriptBox["0", 
+        OverscriptBox["3", "^"]]}],
+      Quantum`Notation`zz080KetArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[RightAngleBracket]"}],
+    Quantum`Notation`zz080Ket,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False]}], "]"}]], "Input",
+ CellChangeTimes->{{3.48001707265625*^9, 3.4800171378125*^9}, {
+  3.480024686046875*^9, 3.48002468684375*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"\[VerticalSeparator]", 
+   TagBox[
+    RowBox[{
+     SubscriptBox["1", 
+      OverscriptBox["1", "^"]], ",", 
+     SubscriptBox["0", 
+      OverscriptBox["2", "^"]], ",", 
+     SubscriptBox["0", 
+      OverscriptBox["3", "^"]]}],
+    Quantum`Notation`zz080KetArgs,
+    BaseStyle->{ShowSyntaxStyles -> True},
+    Editable->True,
+    Selectable->True], "\[RightAngleBracket]"}],
+  Quantum`Notation`zz080Ket,
+  BaseStyle->{ShowSyntaxStyles -> False},
+  Editable->False,
+  Selectable->False]], "Output",
+ CellChangeTimes->{3.48629687270268*^9}]
+}, Open  ]],
+
+Cell["\<\
+If the annihilation operator is applied to a ket with the corresponding \
+fermionic state equal to \"zero\" (nonoccupied), then the ket is \
+\"destroyed\":\
+\>", "Text",
+ CellChangeTimes->{{3.4815482381933174`*^9, 3.4815483411797*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumEvaluate", "[", 
+  RowBox[{
+   RowBox[{"a", "[", "2", "]"}], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+     TagBox[
+      RowBox[{
+       SubscriptBox["1", 
+        OverscriptBox["1", "^"]], ",", 
+       SubscriptBox["0", 
+        OverscriptBox["2", "^"]], ",", 
+       SubscriptBox["0", 
+        OverscriptBox["3", "^"]]}],
+      Quantum`Notation`zz080KetArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[RightAngleBracket]"}],
+    Quantum`Notation`zz080Ket,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False]}], "]"}]], "Input",
+ CellChangeTimes->{3.480017167640625*^9, 3.48002470875*^9}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{3.4862968892334013`*^9}]
+}, Open  ]],
+
+Cell["\<\
+Here we can see the action of the annihilation operator a[2] in any possible \
+basis ket for a three fermionic-states system. Notice the negative signs, \
+which depend on the occupation of the previous fermionic states: \
+\>", "Text",
+ CellChangeTimes->{{3.4815483814148474`*^9, 3.4815484728853536`*^9}, {
+  3.4815489502200165`*^9, 3.481548952376294*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumTableForm", "[", 
+  RowBox[{"a", "[", "2", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.48001688546875*^9, 3.480016988171875*^9}, 
+   3.48002472140625*^9, {3.481550115656809*^9, 3.4815501161568155`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      StyleBox["\[Null]",
+       ShowStringCharacters->False], 
+      TagBox["\<\"  Input\"\>",
+       HoldForm], 
+      TagBox["\<\"  Output\"\>",
+       HoldForm]},
+     {
+      TagBox["0",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["1",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["2",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["0", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]},
+     {
+      TagBox["3",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["0", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]},
+     {
+      TagBox["4",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["5",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["6",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]},
+     {
+      TagBox["7",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxDividers->{
+     "Columns" -> {False, True, {False}, False}, "ColumnsIndexed" -> {}, 
+      "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}],
+   {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[
+   BoxForm`e$, TableSpacing -> {1, 3}, 
+    TableHeadings -> {{0, 1, 2, 3, 4, 5, 6, 7}, {
+      "  Input", "  Output"}}]]]], "Output",
+ CellChangeTimes->{3.486296893483265*^9}]
+}, Open  ]],
+
+Cell["\<\
+Here we can see the action of the annihilation operator a[3] in any possible \
+basis ket for a three fermionic-states system. Notice the negative signs, \
+which depend on the occupation of the previous fermionic states: \
+\>", "Text",
+ CellChangeTimes->{{3.4815483814148474`*^9, 3.4815484728853536`*^9}, {
+  3.4815485448085775`*^9, 3.481548544871078*^9}, {3.481548958376371*^9, 
+  3.4815489601263933`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumTableForm", "[", 
+  RowBox[{"a", "[", "3", "]"}], "]"}]], "Input",
+ CellChangeTimes->{
+  3.4800934537370358`*^9, {3.481550121531884*^9, 3.481550123391283*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      StyleBox["\[Null]",
+       ShowStringCharacters->False], 
+      TagBox["\<\"  Input\"\>",
+       HoldForm], 
+      TagBox["\<\"  Output\"\>",
+       HoldForm]},
+     {
+      TagBox["0",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["1",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["0", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]},
+     {
+      TagBox["2",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["3",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]},
+     {
+      TagBox["4",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["5",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]},
+     {
+      TagBox["6",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["7",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["1", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxDividers->{
+     "Columns" -> {False, True, {False}, False}, "ColumnsIndexed" -> {}, 
+      "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}],
+   {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[
+   BoxForm`e$, TableSpacing -> {1, 3}, 
+    TableHeadings -> {{0, 1, 2, 3, 4, 5, 6, 7}, {
+      "  Input", "  Output"}}]]]], "Output",
+ CellChangeTimes->{3.486296895436328*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Creation Operator in terms of Pauli Operators", "Section",
+ CellChangeTimes->{{3.4503754213125*^9, 3.450375422921875*^9}, {
+  3.480019190140625*^9, 3.480019192859375*^9}, {3.480019248859375*^9, 
+  3.480019284703125*^9}, {3.480019322*^9, 3.480019324671875*^9}, {
+  3.480094136339071*^9, 3.480094139354599*^9}}],
+
+Cell["\<\
+This is the fermionic annihilation operator that was defined above:\
+\>", "Text",
+ CellChangeTimes->{{3.4815485738245735`*^9, 3.4815486125594444`*^9}, 
+   3.4815632085930653`*^9, {3.4815632849065423`*^9, 3.4815632850315437`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"a", "[", "j", "]"}]], "Input",
+ CellChangeTimes->{{3.480024981296875*^9, 3.480024982890625*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  RowBox[{
+   TagBox[
+    RowBox[{
+     UnderoverscriptBox["\[CircleTimes]", 
+      TagBox[
+       RowBox[{"k", "=", "1"}],
+       Quantum`Notation`zz020TPNotationini,
+       Editable->True,
+       Selectable->True], 
+      TagBox[
+       RowBox[{
+        RowBox[{"-", "1"}], "+", "j"}],
+       Quantum`Notation`zz020TPNotationend,
+       Editable->True,
+       Selectable->True]], 
+     TagBox[
+      SubscriptBox["\[Sigma]", 
+       RowBox[{"\[ScriptCapitalZ]", ",", 
+        OverscriptBox["k", "^"]}]],
+      Quantum`Notation`zz020TPNotationdat,
+      Editable->True,
+      Selectable->True]}],
+    Quantum`Notation`zz020TPNotation,
+    Editable->False,
+    Selectable->False], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+     TagBox[
+      SubscriptBox["0", 
+       OverscriptBox["j", "^"]],
+      Quantum`Notation`zz080KetArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[RightAngleBracket]"}],
+    Quantum`Notation`zz080Ket,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+     TagBox[
+      SubscriptBox["1", 
+       OverscriptBox["j", "^"]],
+      Quantum`Notation`zz080BraArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[VerticalSeparator]"}],
+    Quantum`Notation`zz080Bra,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False], "\[CenterDot]", 
+   TagBox[
+    RowBox[{
+     UnderoverscriptBox["\[CircleTimes]", 
+      TagBox[
+       RowBox[{"m", "=", 
+        RowBox[{"j", "+", "1"}]}],
+       Quantum`Notation`zz020TPNotationini,
+       Editable->True,
+       Selectable->True], 
+      TagBox["3",
+       Quantum`Notation`zz020TPNotationend,
+       Editable->True,
+       Selectable->True]], 
+     TagBox[
+      SubscriptBox["\[Sigma]", 
+       RowBox[{"\[ScriptZero]", ",", 
+        OverscriptBox["m", "^"]}]],
+      Quantum`Notation`zz020TPNotationdat,
+      Editable->True,
+      Selectable->True]}],
+    Quantum`Notation`zz020TPNotation,
+    Editable->False,
+    Selectable->False]}]}]], "Output",
+ CellChangeTimes->{3.486296900498666*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "The fermionic creation operator is the hermitian conjugate of the \
+annihilaton operator. Press [ESC]her[ESC] for the hermitian-conjugate \
+template, or use the \"Quantum Notation\" Palette, in the menu Palettes of ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ ":"
+}], "Text",
+ CellChangeTimes->{{3.48154861651262*^9, 3.481548667857027*^9}, {
+  3.481549399882022*^9, 3.481549400663282*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ SuperscriptBox[
+  RowBox[{"a", "[", "j", "]"}], "\[Dagger]"]], "Input",
+ CellChangeTimes->{{3.480019326953125*^9, 3.480019334734375*^9}, 
+   3.480025044703125*^9, {3.480025099625*^9, 3.480025101234375*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  RowBox[{
+   SuperscriptBox[
+    RowBox[{"(", 
+     TagBox[
+      RowBox[{
+       UnderoverscriptBox["\[CircleTimes]", 
+        TagBox[
+         RowBox[{"m", "=", 
+          RowBox[{"j", "+", "1"}]}],
+         Quantum`Notation`zz020TPNotationini,
+         Editable->True,
+         Selectable->True], 
+        TagBox["3",
+         Quantum`Notation`zz020TPNotationend,
+         Editable->True,
+         Selectable->True]], 
+       TagBox[
+        SubscriptBox["\[Sigma]", 
+         RowBox[{"\[ScriptZero]", ",", 
+          OverscriptBox["m", "^"]}]],
+        Quantum`Notation`zz020TPNotationdat,
+        Editable->True,
+        Selectable->True]}],
+      Quantum`Notation`zz020TPNotation,
+      Editable->False,
+      Selectable->False], ")"}], "\[Dagger]"], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+     TagBox[
+      SubscriptBox["1", 
+       OverscriptBox["j", "^"]],
+      Quantum`Notation`zz080KetArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[RightAngleBracket]"}],
+    Quantum`Notation`zz080Ket,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+     TagBox[
+      SubscriptBox["0", 
+       OverscriptBox["j", "^"]],
+      Quantum`Notation`zz080BraArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[VerticalSeparator]"}],
+    Quantum`Notation`zz080Bra,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False], "\[CenterDot]", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     TagBox[
+      RowBox[{
+       UnderoverscriptBox["\[CircleTimes]", 
+        TagBox[
+         RowBox[{"k", "=", "1"}],
+         Quantum`Notation`zz020TPNotationini,
+         Editable->True,
+         Selectable->True], 
+        TagBox[
+         RowBox[{
+          RowBox[{"-", "1"}], "+", "j"}],
+         Quantum`Notation`zz020TPNotationend,
+         Editable->True,
+         Selectable->True]], 
+       TagBox[
+        SubscriptBox["\[Sigma]", 
+         RowBox[{"\[ScriptCapitalZ]", ",", 
+          OverscriptBox["k", "^"]}]],
+        Quantum`Notation`zz020TPNotationdat,
+        Editable->True,
+        Selectable->True]}],
+      Quantum`Notation`zz020TPNotation,
+      Editable->False,
+      Selectable->False], ")"}], "\[Dagger]"]}]}]], "Output",
+ CellChangeTimes->{3.486296902295483*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Each qubit represents a fermionic state. A qubit value of \"zero\" means \
+that the state is not occupied; \"one\" means the fermionic state is \
+occupied. Here the the creation operator ",
+ Cell[BoxData[
+  SuperscriptBox[
+   RowBox[{"a", "[", "2", "]"}], "\[Dagger]"]]],
+ " \"creates\" a fermion in the second fermionic state, ",
+ Cell[BoxData[
+  SubscriptBox["0", 
+   OverscriptBox["2", "^"]]]],
+ "\[Rule]",
+ Cell[BoxData[
+  SubscriptBox["1", 
+   OverscriptBox["2", "^"]]]],
+ ". Notice the negative sign. This sign depends on the occupation of the \
+previous fermionic states:"
+}], "Text",
+ CellChangeTimes->{{3.4815472046822386`*^9, 3.4815472108542714`*^9}, {
+  3.481548004059327*^9, 3.481548156408927*^9}, {3.481548191254015*^9, 
+  3.481548209785977*^9}, {3.4815487141388693`*^9, 3.4815488078900695`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumEvaluate", "[", 
+  RowBox[{
+   SuperscriptBox[
+    RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+     TagBox[
+      RowBox[{
+       SubscriptBox["0", 
+        OverscriptBox["1", "^"]], ",", 
+       SubscriptBox["0", 
+        OverscriptBox["2", "^"]], ",", 
+       SubscriptBox["0", 
+        OverscriptBox["3", "^"]]}],
+      Quantum`Notation`zz080KetArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[RightAngleBracket]"}],
+    Quantum`Notation`zz080Ket,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False]}], "]"}]], "Input",
+ CellChangeTimes->{{3.4799731004375*^9, 3.4799731028125*^9}, {
+  3.480011072578125*^9, 3.480011072796875*^9}, {3.480025138640625*^9, 
+  3.48002518015625*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  TagBox[
+   RowBox[{"\[VerticalSeparator]", 
+    TagBox[
+     RowBox[{
+      SubscriptBox["0", 
+       OverscriptBox["1", "^"]], ",", 
+      SubscriptBox["1", 
+       OverscriptBox["2", "^"]], ",", 
+      SubscriptBox["0", 
+       OverscriptBox["3", "^"]]}],
+     Quantum`Notation`zz080KetArgs,
+     BaseStyle->{ShowSyntaxStyles -> True},
+     Editable->True,
+     Selectable->True], "\[RightAngleBracket]"}],
+   Quantum`Notation`zz080Ket,
+   BaseStyle->{ShowSyntaxStyles -> False},
+   Editable->False,
+   Selectable->False]}]], "Output",
+ CellChangeTimes->{3.486296913404503*^9}]
+}, Open  ]],
+
+Cell["\<\
+If the creation operator is applied to a ket with the corresponding fermionic \
+state equal to \"one\" (occupied), then the ket is \"destroyed\":\
+\>", "Text",
+ CellChangeTimes->{{3.4815488751565557`*^9, 3.481548892375526*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumEvaluate", "[", 
+  RowBox[{
+   SuperscriptBox[
+    RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "\[CenterDot]", 
+   TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+     TagBox[
+      RowBox[{
+       SubscriptBox["0", 
+        OverscriptBox["1", "^"]], ",", 
+       SubscriptBox["1", 
+        OverscriptBox["2", "^"]], ",", 
+       SubscriptBox["0", 
+        OverscriptBox["3", "^"]]}],
+      Quantum`Notation`zz080KetArgs,
+      BaseStyle->{ShowSyntaxStyles -> True},
+      Editable->True,
+      Selectable->True], "\[RightAngleBracket]"}],
+    Quantum`Notation`zz080Ket,
+    BaseStyle->{ShowSyntaxStyles -> False},
+    Editable->False,
+    Selectable->False]}], "]"}]], "Input",
+ CellChangeTimes->{3.48002519884375*^9}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{3.4862969148107076`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Here we can see the action of the creation operator ",
+ Cell[BoxData[
+  SuperscriptBox[
+   RowBox[{"a", "[", "2", "]"}], "\[Dagger]"]]],
+ " in any possible basis ket for a three fermionic-states system. Notice the \
+negative signs, which depend on the occupation of the previous fermionic \
+states: "
+}], "Text",
+ CellChangeTimes->{{3.4815483814148474`*^9, 3.4815484728853536`*^9}, {
+  3.4815489290009947`*^9, 3.4815489424855423`*^9}, {3.481549011892681*^9, 
+  3.4815490178771324`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumTableForm", "[", 
+  SuperscriptBox[
+   RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "]"}]], "Input",
+ CellChangeTimes->{{3.4800252049375*^9, 3.480025257984375*^9}, {
+  3.4815503027529535`*^9, 3.4815503030185823`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      StyleBox["\[Null]",
+       ShowStringCharacters->False], 
+      TagBox["\<\"  Input\"\>",
+       HoldForm], 
+      TagBox["\<\"  Output\"\>",
+       HoldForm]},
+     {
+      TagBox["0",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["0", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]},
+     {
+      TagBox["1",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["0", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]},
+     {
+      TagBox["2",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["3",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["4",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]},
+     {
+      TagBox["5",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]},
+     {
+      TagBox["6",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["7",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxDividers->{
+     "Columns" -> {False, True, {False}, False}, "ColumnsIndexed" -> {}, 
+      "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}],
+   {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[
+   BoxForm`e$, TableSpacing -> {1, 3}, 
+    TableHeadings -> {{0, 1, 2, 3, 4, 5, 6, 7}, {
+      "  Input", "  Output"}}]]]], "Output",
+ CellChangeTimes->{3.486296916654399*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Here we can see the action of the creation operator ",
+ Cell[BoxData[
+  SuperscriptBox[
+   RowBox[{"a", "[", "3", "]"}], "\[Dagger]"]]],
+ " in any possible basis ket for a three fermionic-states system. Notice the \
+negative signs, which depend on the occupation of the previous fermionic \
+states: "
+}], "Text",
+ CellChangeTimes->{{3.4815483814148474`*^9, 3.4815484728853536`*^9}, {
+   3.4815489290009947`*^9, 3.4815489424855423`*^9}, {3.481549011892681*^9, 
+   3.4815490178771324`*^9}, 3.4815490682059016`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"QuantumTableForm", "[", 
+  SuperscriptBox[
+   RowBox[{"a", "[", "3", "]"}], "\[Dagger]"], "]"}]], "Input",
+ CellChangeTimes->{
+  3.480093535463108*^9, {3.481550310268675*^9, 3.4815503105186777`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  TagBox[GridBox[{
+     {
+      StyleBox["\[Null]",
+       ShowStringCharacters->False], 
+      TagBox["\<\"  Input\"\>",
+       HoldForm], 
+      TagBox["\<\"  Output\"\>",
+       HoldForm]},
+     {
+      TagBox["0",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["0", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["0", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]},
+     {
+      TagBox["1",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["2",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]},
+     {
+      TagBox["3",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["0", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["4",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False]},
+     {
+      TagBox["5",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"},
+     {
+      TagBox["6",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["0", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], 
+      RowBox[{"-", 
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+         TagBox[
+          RowBox[{
+           SubscriptBox["1", 
+            OverscriptBox["1", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["2", "^"]], ",", 
+           SubscriptBox["1", 
+            OverscriptBox["3", "^"]]}],
+          Quantum`Notation`zz080KetArgs,
+          BaseStyle->{ShowSyntaxStyles -> True},
+          Editable->True,
+          Selectable->True], "\[RightAngleBracket]"}],
+        Quantum`Notation`zz080Ket,
+        BaseStyle->{ShowSyntaxStyles -> False},
+        Editable->False,
+        Selectable->False]}]},
+     {
+      TagBox["7",
+       HoldForm], 
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+          SubscriptBox["1", 
+           OverscriptBox["1", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["2", "^"]], ",", 
+          SubscriptBox["1", 
+           OverscriptBox["3", "^"]]}],
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False], "0"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxDividers->{
+     "Columns" -> {False, True, {False}, False}, "ColumnsIndexed" -> {}, 
+      "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[2.0999999999999996`]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}],
+   {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+  Function[BoxForm`e$, 
+   TableForm[
+   BoxForm`e$, TableSpacing -> {1, 3}, 
+    TableHeadings -> {{0, 1, 2, 3, 4, 5, 6, 7}, {
+      "  Input", "  Output"}}]]]], "Output",
+ CellChangeTimes->{3.4862969187793303`*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Commutation Relations", "Section",
+ CellChangeTimes->{{3.48003006671875*^9, 3.480030092921875*^9}}],
+
+Cell["\<\
+This is the fermionic annihilation operator that was defined above. \
+TraditionalForm gives a format closer to the format used in papers and \
+textbooks:\
+\>", "Text",
+ CellChangeTimes->{{3.4815485738245735`*^9, 3.4815486125594444`*^9}, {
+  3.4815491495350676`*^9, 3.481549177644802*^9}, {3.481563297687956*^9, 
+  3.481563298609843*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TraditionalForm", "[", 
+  RowBox[{"a", "[", "j", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.480094223148785*^9, 3.480094228554793*^9}}],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"-", 
+   InterpretationBox[
+    RowBox[{
+     TagBox[
+      RowBox[{
+       UnderoverscriptBox["\[CircleTimes]", 
+        TagBox[
+         RowBox[{"k", "=", "1"}],
+         Quantum`Notation`zz020TPNotationini,
+         Editable->True,
+         Selectable->True], 
+        TagBox[
+         RowBox[{"j", "-", "1"}],
+         Quantum`Notation`zz020TPNotationend,
+         Editable->True,
+         Selectable->True]], 
+       TagBox[
+        RowBox[{"(", 
+         InterpretationBox[
+          SubsuperscriptBox["\[Sigma]", 
+           OverscriptBox["k", "^"], "\[ScriptCapitalZ]"],
+          Subscript[
+          Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptCapitalZ], 
+           OverHat[$CellContext`k]]], ")"}],
+        Quantum`Notation`zz020TPNotationdat,
+        Editable->True,
+        Selectable->True]}],
+      Quantum`Notation`zz020TPNotation,
+      Editable->False,
+      Selectable->False], "\[InvisibleSpace]", 
+     InterpretationBox[
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox["0",
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False],
+      Quantum`Notation`zz080Ket[
+       Quantum`Notation`zz080Eigenstate[
+        Quantum`Notation`zz080Operator[$CellContext`j], 0]]], 
+     "\[InvisibleSpace]", 
+     InterpretationBox[
+      TagBox[
+       RowBox[{"\[LeftAngleBracket]", 
+        TagBox["1",
+         Quantum`Notation`zz080BraArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[VerticalSeparator]"}],
+       Quantum`Notation`zz080Bra,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False],
+      Quantum`Notation`zz080Bra[
+       Quantum`Notation`zz080Eigenstate[
+        Quantum`Notation`zz080Operator[$CellContext`j], 1]]], 
+     "\[InvisibleSpace]", 
+     TagBox[
+      RowBox[{
+       UnderoverscriptBox["\[CircleTimes]", 
+        TagBox[
+         RowBox[{"m", "=", 
+          RowBox[{"j", "+", "1"}]}],
+         Quantum`Notation`zz020TPNotationini,
+         Editable->True,
+         Selectable->True], 
+        TagBox["3",
+         Quantum`Notation`zz020TPNotationend,
+         Editable->True,
+         Selectable->True]], 
+       TagBox[
+        RowBox[{"(", 
+         InterpretationBox[
+          SubsuperscriptBox["\[Sigma]", 
+           OverscriptBox["m", "^"], "\[ScriptZero]"],
+          Subscript[
+          Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptZero], 
+           OverHat[$CellContext`m]]], ")"}],
+        Quantum`Notation`zz020TPNotationdat,
+        Editable->True,
+        Selectable->True]}],
+      Quantum`Notation`zz020TPNotation,
+      Editable->False,
+      Selectable->False]}],
+    Quantum`Notation`zz075NonCommutativeTimes[
+     Quantum`Notation`QuantumProduct[
+      Subscript[Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptZero], 
+       OverHat[$CellContext`m]], {$CellContext`m, $CellContext`j + 1, 3}], 
+     Quantum`Notation`zz080Bra[
+      Quantum`Notation`zz080Eigenstate[
+       Quantum`Notation`zz080Operator[$CellContext`j], 1]], 
+     Quantum`Notation`zz080Ket[
+      Quantum`Notation`zz080Eigenstate[
+       Quantum`Notation`zz080Operator[$CellContext`j], 0]], 
+     Quantum`Notation`QuantumProduct[
+      Subscript[
+      Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptCapitalZ], 
+       OverHat[$CellContext`k]], {$CellContext`k, 
+       1, -1 + $CellContext`j}]]]}], TraditionalForm]], "Output",
+ CellChangeTimes->{3.48629692113863*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "The anticommutator of annihilation and creation operators of the same state \
+give the identity. Press [ESC]anti[ESC] for the anticommutator template and \
+[ESC]her[ESC] for the hermitian conjugate, or use the \"Quantum Notation\" \
+Palette, in the menu Palettes of ",
+ StyleBox["Mathematica.",
+  FontSlant->"Italic"],
+ StyleBox["This calculation is too slow, see the Note at the beginning of \
+this document:",
+  FontWeight->"Bold"]
+}], "Text",
+ CellChangeTimes->{{3.4815492582083335`*^9, 3.4815493868037295`*^9}, 
+   3.48154942394483*^9, 3.4815503525348406`*^9, {3.481551156638651*^9, 
+   3.481551168029786*^9}, {3.4815633210788803`*^9, 3.481563337594717*^9}, 
+   3.4862291209862103`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  TagBox[
+   SubscriptBox[
+    RowBox[{"\[LeftDoubleBracket]", 
+     TagBox[
+      RowBox[{
+       RowBox[{"a", "[", "2", "]"}], ",", 
+       SuperscriptBox[
+        RowBox[{"a", "[", "2", "]"}], "\[Dagger]"]}],
+      Quantum`Notation`zz080KetArgs,
+      Editable->True,
+      Selectable->True], "\[RightDoubleBracket]"}], "+"],
+   Quantum`Notation`zz050AntiCommutator,
+   Editable->False,
+   Selectable->False], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptZero]", ",", 
+    OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptZero]", ",", 
+    OverscriptBox["2", "^"]}]], "\[CenterDot]", 
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptZero]", ",", 
+    OverscriptBox["3", "^"]}]]}]], "Output",
+ CellChangeTimes->{3.4862969466221895`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "The PauliIdentities->False option transforms the identity operators to the \
+number one.",
+ StyleBox["This calculation is too slow, see the Note at the beginning of \
+this document:",
+  FontWeight->"Bold"]
+}], "Text",
+ CellChangeTimes->{{3.481549471757942*^9, 3.481549480398678*^9}, {
+  3.4815495113209486`*^9, 3.4815495786968107`*^9}, {3.4815496615728717`*^9, 
+  3.4815496663385572`*^9}, {3.4815497708867707`*^9, 3.4815498265124826`*^9}, {
+  3.481551117027501*^9, 3.481551130778117*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   TagBox[
+    SubscriptBox[
+     RowBox[{"\[LeftDoubleBracket]", 
+      TagBox[
+       RowBox[{
+        RowBox[{"a", "[", "2", "]"}], ",", 
+        SuperscriptBox[
+         RowBox[{"a", "[", "2", "]"}], "\[Dagger]"]}],
+       Quantum`Notation`zz080KetArgs,
+       Editable->True,
+       Selectable->True], "\[RightDoubleBracket]"}], "+"],
+    Quantum`Notation`zz050AntiCommutator,
+    Editable->False,
+    Selectable->False], ",", 
+   RowBox[{"PauliIdentities", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.481549431054296*^9, 3.4815494603984213`*^9}}],
+
+Cell[BoxData["1"], "Output",
+ CellChangeTimes->{3.486296973574452*^9}]
+}, Open  ]],
+
+Cell["\<\
+Anticommutator of annihilation and creation in different fermionic states:\
+\>", "Text",
+ CellChangeTimes->{{3.481551272565719*^9, 3.4815513103174105`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  TagBox[
+   SubscriptBox[
+    RowBox[{"\[LeftDoubleBracket]", 
+     TagBox[
+      RowBox[{
+       RowBox[{"a", "[", "2", "]"}], ",", 
+       SuperscriptBox[
+        RowBox[{"a", "[", "3", "]"}], "\[Dagger]"]}],
+      Quantum`Notation`zz080KetArgs,
+      Editable->True,
+      Selectable->True], "\[RightDoubleBracket]"}], "+"],
+   Quantum`Notation`zz050AntiCommutator,
+   Editable->False,
+   Selectable->False], "]"}]], "Input",
+ CellChangeTimes->{{3.480031245625*^9, 3.480031246203125*^9}, {
+   3.480032035734375*^9, 3.480032047265625*^9}, {3.486229571142727*^9, 
+   3.486229618517727*^9}, 3.4862976721493*^9}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{3.4862976730555735`*^9}]
+}, Open  ]],
+
+Cell["\<\
+Annihilate two times destroys any ket, therefore this anticommutator is zero:\
+\>", "Text",
+ CellChangeTimes->{{3.4815513441623535`*^9, 3.4815513692723713`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  TagBox[
+   SubscriptBox[
+    RowBox[{"\[LeftDoubleBracket]", 
+     TagBox[
+      RowBox[{
+       RowBox[{"a", "[", "2", "]"}], ",", 
+       RowBox[{"a", "[", "2", "]"}]}],
+      Quantum`Notation`zz080KetArgs,
+      Editable->True,
+      Selectable->True], "\[RightDoubleBracket]"}], "+"],
+   Quantum`Notation`zz050AntiCommutator,
+   Editable->False,
+   Selectable->False], "]"}]], "Input",
+ CellChangeTimes->{3.480033383375*^9}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{3.4862976932435904`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Annihilate in ",
+ StyleBox["different",
+  FontWeight->"Bold"],
+ " states does ",
+ StyleBox["not",
+  FontWeight->"Bold"],
+ " destroy any ket, however the anticommutator is zero, see below the \
+True-tables to understand this result:"
+}], "Text",
+ CellChangeTimes->{{3.481551398398117*^9, 3.4815514407742014`*^9}, {
+  3.4815515346359797`*^9, 3.4815515827934623`*^9}, {3.4815519044813395`*^9, 
+  3.48155190715318*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  TagBox[
+   SubscriptBox[
+    RowBox[{"\[LeftDoubleBracket]", 
+     TagBox[
+      RowBox[{
+       RowBox[{"a", "[", "2", "]"}], ",", 
+       RowBox[{"a", "[", "3", "]"}]}],
+      Quantum`Notation`zz080KetArgs,
+      Editable->True,
+      Selectable->True], "\[RightDoubleBracket]"}], "+"],
+   Quantum`Notation`zz050AntiCommutator,
+   Editable->False,
+   Selectable->False], "]"}]], "Input",
+ CellChangeTimes->{{3.480033337796875*^9, 3.48003335359375*^9}}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{3.4862977581670184`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Here we see why the previous anitcommutator ",
+ Cell[BoxData[
+  TagBox[
+   SubscriptBox[
+    RowBox[{"\[LeftDoubleBracket]", 
+     TagBox[
+      RowBox[{
+       RowBox[{"a", "[", "2", "]"}], ",", 
+       RowBox[{"a", "[", "3", "]"}]}],
+      Quantum`Notation`zz080KetArgs,
+      Editable->True,
+      Selectable->True], "\[RightDoubleBracket]"}], "+"],
+   Quantum`Notation`zz050AntiCommutator,
+   Editable->False,
+   Selectable->False]],
+  CellChangeTimes->{{3.480033337796875*^9, 3.48003335359375*^9}}],
+ "=a[2]\[CenterDot]a[3]+a[3]\[CenterDot]a[2] is zero: a[3]\[CenterDot]a[2] \
+gives kets with opposite sign to those given by ",
+ "a[2]\[CenterDot]a[3]: "
+}], "Text",
+ CellChangeTimes->{{3.4815515874185805`*^9, 3.481551598215732*^9}, {
+   3.481551639044752*^9, 3.4815516671857376`*^9}, {3.4815517161707397`*^9, 
+   3.481551765264372*^9}, 3.481563117091894*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Grid", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"QuantumTableForm", "[", 
+       RowBox[{
+        RowBox[{"a", "[", "2", "]"}], "\[CenterDot]", 
+        RowBox[{"a", "[", "3", "]"}]}], "]"}], ",", 
+      RowBox[{"QuantumTableForm", "[", 
+       RowBox[{
+        RowBox[{"a", "[", "3", "]"}], "\[CenterDot]", 
+        RowBox[{"a", "[", "2", "]"}]}], "]"}]}], "}"}], "}"}], ",", 
+   RowBox[{"Dividers", "\[Rule]", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.4815514430711355`*^9, 3.481551515760496*^9}}],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {
+     TagBox[
+      TagBox[GridBox[{
+         {
+          StyleBox["\[Null]",
+           ShowStringCharacters->False], 
+          TagBox["\<\"  Input\"\>",
+           HoldForm], 
+          TagBox["\<\"  Output\"\>",
+           HoldForm]},
+         {
+          TagBox["0",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["1",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["2",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["3",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], 
+          RowBox[{"-", 
+           TagBox[
+            RowBox[{"\[VerticalSeparator]", 
+             TagBox[
+              RowBox[{
+               SubscriptBox["0", 
+                OverscriptBox["1", "^"]], ",", 
+               SubscriptBox["0", 
+                OverscriptBox["2", "^"]], ",", 
+               SubscriptBox["0", 
+                OverscriptBox["3", "^"]]}],
+              Quantum`Notation`zz080KetArgs,
+              BaseStyle->{ShowSyntaxStyles -> True},
+              Editable->True,
+              Selectable->True], "\[RightAngleBracket]"}],
+            Quantum`Notation`zz080Ket,
+            BaseStyle->{ShowSyntaxStyles -> False},
+            Editable->False,
+            Selectable->False]}]},
+         {
+          TagBox["4",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["5",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["6",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["7",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], 
+          RowBox[{"-", 
+           TagBox[
+            RowBox[{"\[VerticalSeparator]", 
+             TagBox[
+              RowBox[{
+               SubscriptBox["1", 
+                OverscriptBox["1", "^"]], ",", 
+               SubscriptBox["0", 
+                OverscriptBox["2", "^"]], ",", 
+               SubscriptBox["0", 
+                OverscriptBox["3", "^"]]}],
+              Quantum`Notation`zz080KetArgs,
+              BaseStyle->{ShowSyntaxStyles -> True},
+              Editable->True,
+              Selectable->True], "\[RightAngleBracket]"}],
+            Quantum`Notation`zz080Ket,
+            BaseStyle->{ShowSyntaxStyles -> False},
+            Editable->False,
+            Selectable->False]}]}
+        },
+        GridBoxAlignment->{
+         "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, 
+          "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+        GridBoxDividers->{
+         "Columns" -> {False, True, {False}, False}, "ColumnsIndexed" -> {}, 
+          "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+        GridBoxSpacings->{"Columns" -> {
+            Offset[0.27999999999999997`], {
+             Offset[2.0999999999999996`]}, 
+            Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+            Offset[0.2], {
+             Offset[0.4]}, 
+            Offset[0.2]}, "RowsIndexed" -> {}}],
+       {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+      Function[BoxForm`e$, 
+       TableForm[
+       BoxForm`e$, TableSpacing -> {1, 3}, 
+        TableHeadings -> {{0, 1, 2, 3, 4, 5, 6, 7}, {
+          "  Input", "  Output"}}]]], 
+     TagBox[
+      TagBox[GridBox[{
+         {
+          StyleBox["\[Null]",
+           ShowStringCharacters->False], 
+          TagBox["\<\"  Input\"\>",
+           HoldForm], 
+          TagBox["\<\"  Output\"\>",
+           HoldForm]},
+         {
+          TagBox["0",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["1",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["2",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["3",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["0", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False]},
+         {
+          TagBox["4",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["5",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["6",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], "0"},
+         {
+          TagBox["7",
+           HoldForm], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["1", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False], 
+          TagBox[
+           RowBox[{"\[VerticalSeparator]", 
+            TagBox[
+             RowBox[{
+              SubscriptBox["1", 
+               OverscriptBox["1", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["2", "^"]], ",", 
+              SubscriptBox["0", 
+               OverscriptBox["3", "^"]]}],
+             Quantum`Notation`zz080KetArgs,
+             BaseStyle->{ShowSyntaxStyles -> True},
+             Editable->True,
+             Selectable->True], "\[RightAngleBracket]"}],
+           Quantum`Notation`zz080Ket,
+           BaseStyle->{ShowSyntaxStyles -> False},
+           Editable->False,
+           Selectable->False]}
+        },
+        GridBoxAlignment->{
+         "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, 
+          "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+        GridBoxDividers->{
+         "Columns" -> {False, True, {False}, False}, "ColumnsIndexed" -> {}, 
+          "Rows" -> {False, True, {False}, False}, "RowsIndexed" -> {}},
+        GridBoxSpacings->{"Columns" -> {
+            Offset[0.27999999999999997`], {
+             Offset[2.0999999999999996`]}, 
+            Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+            Offset[0.2], {
+             Offset[0.4]}, 
+            Offset[0.2]}, "RowsIndexed" -> {}}],
+       {OutputFormsDump`HeadedRows, OutputFormsDump`HeadedColumns}],
+      Function[BoxForm`e$, 
+       TableForm[
+       BoxForm`e$, TableSpacing -> {1, 3}, 
+        TableHeadings -> {{0, 1, 2, 3, 4, 5, 6, 7}, {
+          "  Input", "  Output"}}]]]}
+   },
+   AutoDelete->False,
+   GridBoxDividers->{"Columns" -> {{True}}, "Rows" -> {{True}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+  "Grid"]], "Output",
+ CellChangeTimes->{3.4862977683857684`*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Special Products of Annihilation and Creation Operators", "Section",
+ CellChangeTimes->{{3.480033772375*^9, 3.4800338051875*^9}}],
+
+Cell["\<\
+This is the fermionic annihilation operator that was defined above. \
+TraditionalForm gives a format closer to the format used in papers and \
+textbooks:\
+\>", "Text",
+ CellChangeTimes->{{3.4815485738245735`*^9, 3.4815486125594444`*^9}, {
+  3.4815491495350676`*^9, 3.481549177644802*^9}, {3.481563382470291*^9, 
+  3.4815633834859295`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TraditionalForm", "[", 
+  RowBox[{"a", "[", "j", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.4802848093125*^9, 3.480284814546875*^9}}],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"-", 
+   InterpretationBox[
+    RowBox[{
+     TagBox[
+      RowBox[{
+       UnderoverscriptBox["\[CircleTimes]", 
+        TagBox[
+         RowBox[{"k", "=", "1"}],
+         Quantum`Notation`zz020TPNotationini,
+         Editable->True,
+         Selectable->True], 
+        TagBox[
+         RowBox[{"j", "-", "1"}],
+         Quantum`Notation`zz020TPNotationend,
+         Editable->True,
+         Selectable->True]], 
+       TagBox[
+        RowBox[{"(", 
+         InterpretationBox[
+          SubsuperscriptBox["\[Sigma]", 
+           OverscriptBox["k", "^"], "\[ScriptCapitalZ]"],
+          Subscript[
+          Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptCapitalZ], 
+           OverHat[$CellContext`k]]], ")"}],
+        Quantum`Notation`zz020TPNotationdat,
+        Editable->True,
+        Selectable->True]}],
+      Quantum`Notation`zz020TPNotation,
+      Editable->False,
+      Selectable->False], "\[InvisibleSpace]", 
+     InterpretationBox[
+      TagBox[
+       RowBox[{"\[VerticalSeparator]", 
+        TagBox["0",
+         Quantum`Notation`zz080KetArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[RightAngleBracket]"}],
+       Quantum`Notation`zz080Ket,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False],
+      Quantum`Notation`zz080Ket[
+       Quantum`Notation`zz080Eigenstate[
+        Quantum`Notation`zz080Operator[$CellContext`j], 0]]], 
+     "\[InvisibleSpace]", 
+     InterpretationBox[
+      TagBox[
+       RowBox[{"\[LeftAngleBracket]", 
+        TagBox["1",
+         Quantum`Notation`zz080BraArgs,
+         BaseStyle->{ShowSyntaxStyles -> True},
+         Editable->True,
+         Selectable->True], "\[VerticalSeparator]"}],
+       Quantum`Notation`zz080Bra,
+       BaseStyle->{ShowSyntaxStyles -> False},
+       Editable->False,
+       Selectable->False],
+      Quantum`Notation`zz080Bra[
+       Quantum`Notation`zz080Eigenstate[
+        Quantum`Notation`zz080Operator[$CellContext`j], 1]]], 
+     "\[InvisibleSpace]", 
+     TagBox[
+      RowBox[{
+       UnderoverscriptBox["\[CircleTimes]", 
+        TagBox[
+         RowBox[{"m", "=", 
+          RowBox[{"j", "+", "1"}]}],
+         Quantum`Notation`zz020TPNotationini,
+         Editable->True,
+         Selectable->True], 
+        TagBox["3",
+         Quantum`Notation`zz020TPNotationend,
+         Editable->True,
+         Selectable->True]], 
+       TagBox[
+        RowBox[{"(", 
+         InterpretationBox[
+          SubsuperscriptBox["\[Sigma]", 
+           OverscriptBox["m", "^"], "\[ScriptZero]"],
+          Subscript[
+          Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptZero], 
+           OverHat[$CellContext`m]]], ")"}],
+        Quantum`Notation`zz020TPNotationdat,
+        Editable->True,
+        Selectable->True]}],
+      Quantum`Notation`zz020TPNotation,
+      Editable->False,
+      Selectable->False]}],
+    Quantum`Notation`zz075NonCommutativeTimes[
+     Quantum`Notation`QuantumProduct[
+      Subscript[Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptZero], 
+       OverHat[$CellContext`m]], {$CellContext`m, $CellContext`j + 1, 3}], 
+     Quantum`Notation`zz080Bra[
+      Quantum`Notation`zz080Eigenstate[
+       Quantum`Notation`zz080Operator[$CellContext`j], 1]], 
+     Quantum`Notation`zz080Ket[
+      Quantum`Notation`zz080Eigenstate[
+       Quantum`Notation`zz080Operator[$CellContext`j], 0]], 
+     Quantum`Notation`QuantumProduct[
+      Subscript[
+      Quantum`Computing`\[Sigma], Quantum`Computing`\[ScriptCapitalZ], 
+       OverHat[$CellContext`k]], {$CellContext`k, 
+       1, -1 + $CellContext`j}]]]}], TraditionalForm]], "Output",
+ CellChangeTimes->{3.4862977740420184`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Next expression evaluates to ",
+ Cell[BoxData[
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptCapitalZ]", ",", 
+    OverscriptBox["2", "^"]}]]],
+  CellChangeTimes->{3.4815520204486055`*^9}],
+ " (times the identities in the other qubits/fermionic-states). This can be \
+useful to write Hamiltionians, see the last two pages of ",
+ ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.\
+pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]\
+, None},
+  ButtonNote->
+   "http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]
+}], "Text",
+ CellChangeTimes->{{3.481552062667155*^9, 3.481552207635905*^9}, {
+  3.481552243729655*^9, 3.481552275542155*^9}, {3.4815625243186817`*^9, 
+  3.4815625318656535`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"a", "[", "2", "]"}], "\[CenterDot]", 
+    SuperscriptBox[
+     RowBox[{"a", "[", "2", "]"}], "\[Dagger]"]}], "-", 
+   RowBox[{
+    SuperscriptBox[
+     RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "\[CenterDot]", 
+    RowBox[{"a", "[", "2", "]"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.4800338098125*^9, 3.4800338144375*^9}, {
+  3.48003385228125*^9, 3.48003388390625*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptZero]", ",", 
+    OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptCapitalZ]", ",", 
+    OverscriptBox["2", "^"]}]], "\[CenterDot]", 
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptZero]", ",", 
+    OverscriptBox["3", "^"]}]]}]], "Output",
+ CellChangeTimes->{3.4862978011670184`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "The PauliIdentities->False option transforms the identity operators to the \
+number one.",
+ StyleBox["This calculation is too slow, see the Note at the beginning of \
+this document:",
+  FontWeight->"Bold"]
+}], "Text",
+ CellChangeTimes->{3.4862978878857684`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"a", "[", "2", "]"}], "\[CenterDot]", 
+     SuperscriptBox[
+      RowBox[{"a", "[", "2", "]"}], "\[Dagger]"]}], "-", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "\[CenterDot]", 
+     RowBox[{"a", "[", "2", "]"}]}]}], ",", 
+   RowBox[{"PauliIdentities", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.486297819057644*^9, 3.486297831932644*^9}}],
+
+Cell[BoxData[
+ SubscriptBox["\[Sigma]", 
+  RowBox[{"\[ScriptCapitalZ]", ",", 
+   OverscriptBox["2", "^"]}]]], "Output",
+ CellChangeTimes->{3.4862978536982684`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Next expression evaluates to ",
+ Cell[BoxData[
+  RowBox[{
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalX]", ",", 
+     OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalX]", ",", 
+     OverscriptBox["2", "^"]}]]}]],
+  CellChangeTimes->{3.4815520204486055`*^9}],
+ " (times the identities in the other qubits/fermionic-states). This can be \
+useful to write Hamiltionians, see the last two pages of ",
+ ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.\
+pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]\
+, None},
+  ButtonNote->
+   "http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]
+}], "Text",
+ CellChangeTimes->{{3.481552062667155*^9, 3.481552207635905*^9}, {
+  3.481552243729655*^9, 3.481552275542155*^9}, {3.4815625243186817`*^9, 
+  3.4815625611316533`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "-", 
+     RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "+", 
+     RowBox[{"a", "[", "2", "]"}]}], ")"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.4800340289375*^9, 3.480034079125*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptCapitalX]", ",", 
+    OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptCapitalX]", ",", 
+    OverscriptBox["2", "^"]}]], "\[CenterDot]", 
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptZero]", ",", 
+    OverscriptBox["3", "^"]}]]}]], "Output",
+ CellChangeTimes->{3.486297925745144*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "The PauliIdentities->False option transforms the identity operators to the \
+number one.",
+ StyleBox["This calculation is too slow, see the Note at the beginning of \
+this document:",
+  FontWeight->"Bold"]
+}], "Text",
+ CellChangeTimes->{3.4862978878857684`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "-", 
+      RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "+", 
+      RowBox[{"a", "[", "2", "]"}]}], ")"}]}], ",", 
+   RowBox[{"PauliIdentities", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.4862979391045184`*^9, 3.486297939463894*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptCapitalX]", ",", 
+    OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+  SubscriptBox["\[Sigma]", 
+   RowBox[{"\[ScriptCapitalX]", ",", 
+    OverscriptBox["2", "^"]}]]}]], "Output",
+ CellChangeTimes->{3.4862979645732684`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Next expression can be useful to write Hamiltionians, see the last two \
+pages of ",
+ ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.\
+pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]\
+, None},
+  ButtonNote->
+   "http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]
+}], "Text",
+ CellChangeTimes->{{3.481552062667155*^9, 3.481552207635905*^9}, {
+   3.481552243729655*^9, 3.481552275542155*^9}, {3.4815625243186817`*^9, 
+   3.4815625611316533`*^9}, 3.4815626086166363`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "+", 
+     RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "-", 
+     RowBox[{"a", "[", "2", "]"}]}], ")"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.48003413890625*^9, 3.4800341521875*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  RowBox[{
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+     OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+     OverscriptBox["2", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptZero]", ",", 
+     OverscriptBox["3", "^"]}]]}]}]], "Output",
+ CellChangeTimes->{3.4862979926982684`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "The PauliIdentities->False option transforms the identity operators to the \
+number one.",
+ StyleBox["This calculation is too slow, see the Note at the beginning of \
+this document:",
+  FontWeight->"Bold"]
+}], "Text",
+ CellChangeTimes->{3.4862978878857684`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "+", 
+      RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "-", 
+      RowBox[{"a", "[", "2", "]"}]}], ")"}]}], ",", 
+   RowBox[{"PauliIdentities", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.4862979821982684`*^9, 3.4862979825420184`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  RowBox[{
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+     OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+     OverscriptBox["2", "^"]}]]}]}]], "Output",
+ CellChangeTimes->{3.4862980141045184`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Next expression can be useful to write Hamiltionians, see the last two \
+pages of ",
+ ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.\
+pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]\
+, None},
+  ButtonNote->
+   "http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]
+}], "Text",
+ CellChangeTimes->{{3.481552062667155*^9, 3.481552207635905*^9}, {
+   3.481552243729655*^9, 3.481552275542155*^9}, {3.4815625243186817`*^9, 
+   3.4815625611316533`*^9}, 3.4815626086166363`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "-", 
+     RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "-", 
+     RowBox[{"a", "[", "2", "]"}]}], ")"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.48003422053125*^9, 3.480034220984375*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"-", "\[ImaginaryI]"}], " ", 
+  RowBox[{
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalX]", ",", 
+     OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+     OverscriptBox["2", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptZero]", ",", 
+     OverscriptBox["3", "^"]}]]}]}]], "Output",
+ CellChangeTimes->{3.486298036307644*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "The PauliIdentities->False option transforms the identity operators to the \
+number one.",
+ StyleBox["This calculation is too slow, see the Note at the beginning of \
+this document:",
+  FontWeight->"Bold"]
+}], "Text",
+ CellChangeTimes->{3.4862978878857684`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "-", 
+      RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "-", 
+      RowBox[{"a", "[", "2", "]"}]}], ")"}]}], ",", 
+   RowBox[{"PauliIdentities", "\[Rule]", "False"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.486298024026394*^9, 3.4862980243857684`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"-", "\[ImaginaryI]"}], " ", 
+  RowBox[{
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalX]", ",", 
+     OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+     OverscriptBox["2", "^"]}]]}]}]], "Output",
+ CellChangeTimes->{3.4862980576826196`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Next expression can be useful to write Hamiltionians, see the last two \
+pages of ",
+ ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.\
+pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]\
+, None},
+  ButtonNote->
+   "http://homepage.cem.itesm.mx/lgomez/quantum/NielsenJordanWigner.pdf"]
+}], "Text",
+ CellChangeTimes->{{3.481552062667155*^9, 3.481552207635905*^9}, {
+   3.481552243729655*^9, 3.481552275542155*^9}, {3.4815625243186817`*^9, 
+   3.4815625611316533`*^9}, 3.4815626086166363`*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PauliExpand", "[", 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "+", 
+     RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+   RowBox[{"(", 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "+", 
+     RowBox[{"a", "[", "2", "]"}]}], ")"}]}], "]"}]], "Input",
+ CellChangeTimes->{3.480034245296875*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"-", "\[ImaginaryI]"}], " ", 
+  RowBox[{
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+     OverscriptBox["1", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalX]", ",", 
+     OverscriptBox["2", "^"]}]], "\[CenterDot]", 
+   SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptZero]", ",", 
+     OverscriptBox["3", "^"]}]]}]}]], "Output",
+ CellChangeTimes->{3.4862980788856087`*^9}]
+}, Open  ]],
+
+Cell["\<\
+TraditionalForm[] gives a format closer to the format of papers and textbooks:\
+\>", "Text",
+ CellChangeTimes->{{3.481552322417155*^9, 3.481552348073558*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TraditionalForm", "[", 
+  RowBox[{"PauliExpand", "[", 
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "+", 
+      RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "+", 
+      RowBox[{"a", "[", "2", "]"}]}], ")"}]}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.4800938867521615`*^9, 3.480093911236537*^9}}],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"-", "\[ImaginaryI]"}], " ", 
+   InterpretationBox[
+    RowBox[{
+     InterpretationBox[
+      SubsuperscriptBox["\[Sigma]", 
+       InterpretationBox["1",
+        Quantum`Notation`zz080Operator[1]], "\[ScriptCapitalY]"],
+      Quantum`Computing`\[Sigma][Quantum`Computing`\[ScriptCapitalY], 
+       Quantum`Notation`zz080Operator[1]]], "\[InvisibleSpace]", 
+     InterpretationBox[
+      SubsuperscriptBox["\[Sigma]", 
+       InterpretationBox["2",
+        Quantum`Notation`zz080Operator[2]], "\[ScriptCapitalX]"],
+      Quantum`Computing`\[Sigma][Quantum`Computing`\[ScriptCapitalX], 
+       Quantum`Notation`zz080Operator[2]]], "\[InvisibleSpace]", 
+     InterpretationBox[
+      SubsuperscriptBox["\[Sigma]", 
+       InterpretationBox["3",
+        Quantum`Notation`zz080Operator[3]], "\[ScriptZero]"],
+      Quantum`Computing`\[Sigma][Quantum`Computing`\[ScriptZero], 
+       Quantum`Notation`zz080Operator[3]]]}],
+    Quantum`Notation`zz075NonCommutativeTimes[
+     Quantum`Computing`\[Sigma][0, 
+      Quantum`Notation`zz080Operator[3]], 
+     Quantum`Computing`\[Sigma][1, 
+      Quantum`Notation`zz080Operator[2]], 
+     Quantum`Computing`\[Sigma][2, 
+      Quantum`Notation`zz080Operator[1]]]]}], TraditionalForm]], "Output",
+ CellChangeTimes->{3.4862981000729733`*^9}]
+}, Open  ]],
+
+Cell["\<\
+TeXForm can be used to generate expression for papers and books\
+\>", "Text",
+ CellChangeTimes->{{3.481552359245576*^9, 3.48155240174612*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"TeXForm", "[", 
+  RowBox[{"TraditionalForm", "[", 
+   RowBox[{"PauliExpand", "[", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox[
+        RowBox[{"a", "[", "1", "]"}], "\[Dagger]"], "+", 
+       RowBox[{"a", "[", "1", "]"}]}], ")"}], "\[CenterDot]", 
+     RowBox[{"(", 
+      RowBox[{
+       SuperscriptBox[
+        RowBox[{"a", "[", "2", "]"}], "\[Dagger]"], "+", 
+       RowBox[{"a", "[", "2", "]"}]}], ")"}]}], "]"}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.481552395402289*^9, 3.4815524114181185`*^9}}],
+
+Cell["\<\
+-i \\sigma _1^{\\mathcal{Y}}\\sigma _2^{\\mathcal{X}}\\sigma
+   _3^{\\mathit{0}}\
+\>", "Output",
+ CellChangeTimes->{3.486298121494711*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["NOTE: ", "Section",
+ CellChangeTimes->{{3.4815472221045594`*^9, 3.4815472258546553`*^9}}],
+
+Cell[TextData[{
+ "This ",
+ StyleBox["could",
+  FontWeight->"Bold"],
+ " be an efficient implementation of fermionic operators in a ",
+ StyleBox["quantum computer",
+  FontWeight->"Bold"],
+ ". However, in this \"normal\" computer, these calculations are ",
+ StyleBox["very",
+  FontWeight->"Bold"],
+ " slow. If you need faster calculations with these operators, and you do not \
+care about their possible implementation in a quantum computer, these \
+documents might be useful for you:\n\n",
+ ButtonBox["Algebra of operators and commutators. Mathematica file: \
+http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.nb",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.nb"], None},
+  ButtonNote->"http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.nb"],
+ "\n\n",
+ ButtonBox["Algebra of operators and commutators. PDF file: \
+http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.pdf"], None},
+  ButtonNote->"http://homepage.cem.itesm.mx/lgomez/quantum/v7algebra.pdf"],
+ "\n  "
+}], "Text",
+ CellChangeTimes->{{3.481547237870504*^9, 3.481547286558627*^9}, {
+  3.481547346403143*^9, 3.4815474704047303`*^9}, {3.4815475388431063`*^9, 
+  3.481547588828121*^9}, {3.4815476588928676`*^9, 3.481547770636539*^9}, {
+  3.4815478089991055`*^9, 3.4815478126400337`*^9}, {3.4815497044796705`*^9, 
+  3.4815497064015703`*^9}, {3.481551786310977*^9, 3.481551795310862*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "Section"],
+
+Cell[TextData[{
+ "by Jos\[EAcute] Luis G\[OAcute]mez-Mu\[NTilde]oz\n",
+ ButtonBox["http://homepage.cem.itesm.mx/lgomez/quantum/",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://homepage.cem.itesm.mx/lgomez/quantum/"], None},
+  ButtonNote->"http://homepage.cem.itesm.mx/lgomez/quantum/"],
+ "\njose.luis.gomez@itesm.mx  "
+}], "Text",
+ CellChangeTimes->{{3.45008652390625*^9, 3.45008658784375*^9}, {
+   3.450086927796875*^9, 3.450086927796875*^9}, 3.450354855359375*^9, 
+   3.450445823609375*^9}]
+}, Open  ]]
+}, Open  ]]
+},
+AutoGeneratedPackage->None,
+Saveable->False,
+WindowSize->{818, 610},
+WindowMargins->{{6, Automatic}, {Automatic, 1}},
+ShowSelection->True,
+CellLabelAutoDelete->True,
+InputAliases->{"anti" -> TagBox[
+    SubscriptBox[
+     RowBox[{"\[LeftDoubleBracket]", 
+       TagBox[
+        RowBox[{"\[Placeholder]", ",", "\[Placeholder]"}], 
+        Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True], 
+       "\[RightDoubleBracket]"}], "+"], Quantum`Notation`zz050AntiCommutator, 
+    Editable -> False, Selectable -> False], "b-" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["-", 
+        OverscriptBox["\[Placeholder]", "^"], 
+        BaseStyle -> {ShowSyntaxStyles -> False}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "b+" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["+", 
+        OverscriptBox["\[Placeholder]", "^"], 
+        BaseStyle -> {ShowSyntaxStyles -> False}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "b00" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptZero]\[ScriptZero]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "b01" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptZero]\[ScriptOne]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "b10" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptOne]\[ScriptZero]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "b11" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptOne]\[ScriptOne]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "bphi-" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPhi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "-"], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "bphi+" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPhi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "+"], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "bpsi-" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPsi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "-"], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "bpsi+" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPsi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "+"], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "bra" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+      "\[Placeholder]", Quantum`Notation`zz080BraArgs, Editable -> True, 
+       Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+      "\[VerticalSeparator]"}], Quantum`Notation`zz080Bra, Editable -> False, 
+    Selectable -> False, BaseStyle -> {ShowSyntaxStyles -> False}], "braket" -> 
+  TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+      "\[Placeholder]", Quantum`Notation`zz080BraArgs, Editable -> True, 
+       Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+      "\[VerticalSeparator]", 
+      TagBox[
+      "\[Placeholder]", Quantum`Notation`zz080KetArgs, Editable -> True, 
+       Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+      "\[RightAngleBracket]"}], Quantum`Notation`zz080BraKet, Editable -> 
+    False, Selectable -> False, BaseStyle -> {ShowSyntaxStyles -> False}], 
+  "cccg" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "cccgate" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "cccnot" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       TagBox[
+        SubscriptBox["\[ScriptCapitalN]\[ScriptCapitalO]\[ScriptCapitalT]", 
+         TagBox[
+          OverscriptBox["\[Placeholder]", "^"], Quantum`Computing`zz020TPdat, 
+          Editable -> True, Selectable -> True]], Quantum`Computing`zz020TP, 
+        Editable -> False, Selectable -> False], Quantum`Computing`zz020TPdat,
+        Editable -> True, Selectable -> True], "]"}], 
+    Quantum`Computing`zz020TP, Editable -> False, Selectable -> False], "ccg" -> 
+  TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "ccgate" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "ccnot" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       TagBox[
+        SubscriptBox["\[ScriptCapitalN]\[ScriptCapitalO]\[ScriptCapitalT]", 
+         TagBox[
+          OverscriptBox["\[Placeholder]", "^"], Quantum`Computing`zz020TPdat, 
+          Editable -> True, Selectable -> True]], Quantum`Computing`zz020TP, 
+        Editable -> False, Selectable -> False], Quantum`Computing`zz020TPdat,
+        Editable -> True, Selectable -> True], "]"}], 
+    Quantum`Computing`zz020TP, Editable -> False, Selectable -> False], "cg" -> 
+  TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "cgate" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "cng" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+       "\[Placeholder]", Quantum`Computing`zz020TPend, Editable -> True, 
+        Selectable -> True]], "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "cngate" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+       "\[Placeholder]", Quantum`Computing`zz020TPend, Editable -> True, 
+        Selectable -> True]], "[", 
+      TagBox[
+       RowBox[{"\[Placeholder]"}], Quantum`Computing`zz020TPdat, Editable -> 
+       True, Selectable -> True], "]"}], Quantum`Computing`zz020TP, Editable -> 
+    False, Selectable -> False], "cnnot" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+       "\[Placeholder]", Quantum`Computing`zz020TPend, Editable -> True, 
+        Selectable -> True]], "[", 
+      TagBox[
+       TagBox[
+        SubscriptBox["\[ScriptCapitalN]\[ScriptCapitalO]\[ScriptCapitalT]", 
+         TagBox[
+          OverscriptBox["\[Placeholder]", "^"], Quantum`Computing`zz020TPdat, 
+          Editable -> True, Selectable -> True]], Quantum`Computing`zz020TP, 
+        Editable -> False, Selectable -> False], Quantum`Computing`zz020TPdat,
+        Editable -> True, Selectable -> True], "]"}], 
+    Quantum`Computing`zz020TP, Editable -> False, Selectable -> False], 
+  "cnot" -> TagBox[
+    RowBox[{
+      SuperscriptBox["\[ScriptCapitalC]", 
+       TagBox[
+        RowBox[{"{", 
+          OverscriptBox["\[Placeholder]", "^"], "}"}], 
+        Quantum`Computing`zz020TPend, Editable -> True, Selectable -> True]], 
+      "[", 
+      TagBox[
+       TagBox[
+        SubscriptBox["\[ScriptCapitalN]\[ScriptCapitalO]\[ScriptCapitalT]", 
+         TagBox[
+          OverscriptBox["\[Placeholder]", "^"], Quantum`Computing`zz020TPdat, 
+          Editable -> True, Selectable -> True]], Quantum`Computing`zz020TP, 
+        Editable -> False, Selectable -> False], Quantum`Computing`zz020TPdat,
+        Editable -> True, Selectable -> True], "]"}], 
+    Quantum`Computing`zz020TP, Editable -> False, Selectable -> False], 
+  "comm" -> TagBox[
+    SubscriptBox[
+     RowBox[{"\[LeftDoubleBracket]", 
+       TagBox[
+        RowBox[{"\[Placeholder]", ",", "\[Placeholder]"}], 
+        Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True], 
+       "\[RightDoubleBracket]"}], "-"], Quantum`Notation`zz050Commutator, 
+    Editable -> False, Selectable -> False], "con" -> SuperscriptBox[
+    RowBox[{"(", "\[Placeholder]", ")"}], "*"], "ebra" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "ebraket" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080BraKet, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eebra" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eebraket" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080BraKet, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eeebra" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eeebraket" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080BraKet, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eeeket" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eeeketbra" -> RowBox[{
+     TagBox[
+      RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+      Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}], "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+      Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}]}], "eeket" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eeketbra" -> RowBox[{
+     TagBox[
+      RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+      Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}], "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+      Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}]}], "eket" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "eketbra" -> RowBox[{
+     TagBox[
+      RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], 
+         Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+      Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}], "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+        TagBox[
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], 
+         Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+      Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}]}], "ev" -> 
+  SubscriptBox["\[Placeholder]", 
+    OverscriptBox["\[Placeholder]", "^"]], "eval" -> 
+  SubscriptBox["\[Placeholder]", 
+    OverscriptBox["\[Placeholder]", "^"]], "fred" -> 
+  SubscriptBox[
+   "\[ScriptCapitalF]\[ScriptCapitalR]\[ScriptCapitalE]\[ScriptCapitalD]\
+\[ScriptCapitalK]\[ScriptCapitalI]\[ScriptCapitalN]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "her" -> SuperscriptBox[
+    RowBox[{"(", "\[Placeholder]", ")"}], "\[Dagger]"], "hg" -> 
+  SubscriptBox["\[ScriptCapitalH]", 
+    OverscriptBox["\[Placeholder]", "^"]], "hgg" -> 
+  SubscriptBox["\[ScriptCapitalH]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "hggg" -> 
+  SubscriptBox["\[ScriptCapitalH]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "hn" -> 
+  SubscriptBox["\[ScriptCapitalH]", "\[Placeholder]"], "id" -> 
+  SubscriptBox["\[ScriptCapitalI]", 
+    OverscriptBox["\[Placeholder]", "^"]], "idd" -> 
+  SubscriptBox["\[ScriptCapitalI]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "iddd" -> 
+  SubscriptBox["\[ScriptCapitalI]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "ig" -> 
+  SubscriptBox["\[ScriptCapitalI]", 
+    OverscriptBox["\[Placeholder]", "^"]], "igg" -> 
+  SubscriptBox["\[ScriptCapitalI]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "iggg" -> 
+  SubscriptBox["\[ScriptCapitalI]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "in" -> 
+  SubscriptBox["\[ScriptCapitalI]", "\[Placeholder]"], "k-" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["-", 
+        OverscriptBox["\[Placeholder]", "^"], 
+        BaseStyle -> {ShowSyntaxStyles -> False}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "k+" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["+", 
+        OverscriptBox["\[Placeholder]", "^"], 
+        BaseStyle -> {ShowSyntaxStyles -> False}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "k00" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptZero]\[ScriptZero]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "k01" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptZero]\[ScriptOne]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "k10" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptOne]\[ScriptZero]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "k11" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["\[ScriptCapitalB]", 
+        RowBox[{"\[ScriptOne]\[ScriptOne]", ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}]], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "ket" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+      "\[Placeholder]", Quantum`Notation`zz080KetArgs, Editable -> True, 
+       Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+      "\[RightAngleBracket]"}], Quantum`Notation`zz080Ket, Editable -> False, 
+    Selectable -> False, BaseStyle -> {ShowSyntaxStyles -> False}], "ketbra" -> 
+  RowBox[{
+     TagBox[
+      RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+        "\[Placeholder]", Quantum`Notation`zz080KetArgs, Editable -> True, 
+         Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+        "\[RightAngleBracket]"}], Quantum`Notation`zz080Ket, Editable -> 
+      False, Selectable -> False, BaseStyle -> {ShowSyntaxStyles -> False}], 
+     "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+        TagBox[
+        "\[Placeholder]", Quantum`Notation`zz080BraArgs, Editable -> True, 
+         Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+        "\[VerticalSeparator]"}], Quantum`Notation`zz080Bra, Editable -> 
+      False, Selectable -> False, BaseStyle -> {ShowSyntaxStyles -> False}]}],
+   "kphi-" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPhi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "-"], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "kphi+" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPhi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "+"], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "kpsi-" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPsi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "-"], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "kpsi+" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubsuperscriptBox["\[CapitalPsi]", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "+"], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "norm" -> 
+  RowBox[{"\[LeftDoubleBracketingBar]", "\[Placeholder]", 
+     "\[RightDoubleBracketingBar]"}], "on" -> "\[CenterDot]", "op" -> 
+  OverscriptBox["\[Placeholder]", "^"], "pg" -> RowBox[{
+     SubscriptBox["\[ScriptCapitalP]", 
+      OverscriptBox["\[Placeholder]", "^"]], "[", "\[Placeholder]", "]"}], 
+  "pgg" -> RowBox[{
+     SubscriptBox["\[ScriptCapitalP]", 
+      RowBox[{"{", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "[", 
+     "\[Placeholder]", "]"}], "pggg" -> RowBox[{
+     SubscriptBox["\[ScriptCapitalP]", 
+      RowBox[{"{", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "[", 
+     "\[Placeholder]", "]"}], "pn" -> RowBox[{
+     SubscriptBox["\[ScriptCapitalP]", "\[Placeholder]"], "[", 
+     "\[Placeholder]", "]"}], "po" -> SuperscriptBox[
+    RowBox[{"(", "\[Placeholder]", ")"}], "\[Placeholder]"], "pow" -> 
+  SuperscriptBox[
+    RowBox[{"(", "\[Placeholder]", ")"}], "\[Placeholder]"], "pqg" -> RowBox[{
+     SubscriptBox["\[Placeholder]", 
+      OverscriptBox["\[Placeholder]", "^"]], "[", "\[Placeholder]", "]"}], 
+  "pqgg" -> RowBox[{
+     SubscriptBox["\[Placeholder]", 
+      RowBox[{"{", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "[", 
+     "\[Placeholder]", "]"}], "pqggg" -> RowBox[{
+     SubscriptBox["\[Placeholder]", 
+      RowBox[{"{", 
+        RowBox[{
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"], ",", 
+          OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "[", 
+     "\[Placeholder]", "]"}], "pqqg" -> RowBox[{
+     SubscriptBox["\[Placeholder]", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}]], "[", "\[Placeholder]", "]"}],
+   "pqqqg" -> RowBox[{
+     SubscriptBox["\[Placeholder]", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}]], "[", "\[Placeholder]", "]"}],
+   "qb" -> OverscriptBox["\[Placeholder]", "^"], "qbra" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["\[Placeholder]", 
+        OverscriptBox["\[Placeholder]", "^"]], Quantum`Notation`zz080BraArgs, 
+       Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qbra0" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["0", 
+        OverscriptBox["\[Placeholder]", "^"]], Quantum`Notation`zz080BraArgs, 
+       Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qbra1" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       SubscriptBox["1", 
+        OverscriptBox["\[Placeholder]", "^"]], Quantum`Notation`zz080BraArgs, 
+       Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qf" -> 
+  SubscriptBox[
+   "\[ScriptCapitalQ]\[ScriptCapitalF]\[ScriptCapitalT]", "\[Placeholder]"], 
+  "qft" -> SubscriptBox["\[ScriptCapitalQ]\[ScriptCapitalF]\[ScriptCapitalT]", 
+    OverscriptBox["\[Placeholder]", "^"]], "qg" -> 
+  SubscriptBox["\[Placeholder]", 
+    OverscriptBox["\[Placeholder]", "^"]], "qgg" -> 
+  SubscriptBox["\[Placeholder]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "qggg" -> 
+  SubscriptBox["\[Placeholder]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "qket" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["\[Placeholder]", 
+        OverscriptBox["\[Placeholder]", "^"]], Quantum`Notation`zz080KetArgs, 
+       Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qket0" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["0", 
+        OverscriptBox["\[Placeholder]", "^"]], Quantum`Notation`zz080KetArgs, 
+       Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qket1" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       SubscriptBox["1", 
+        OverscriptBox["\[Placeholder]", "^"]], Quantum`Notation`zz080KetArgs, 
+       Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qketbra" -> RowBox[{
+     TagBox[
+      RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], 
+         Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+      Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}], "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+        TagBox[
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], 
+         Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+      Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}]}], "qlbl" -> 
+  SubscriptBox["\[Placeholder]", 
+    OverscriptBox["\[Placeholder]", "^"]], "qn" -> 
+  SubscriptBox["\[Placeholder]", "\[Placeholder]"], "qp" -> TagBox[
+    RowBox[{
+      UnderoverscriptBox["\[CircleTimes]", 
+       TagBox[
+       "\[Placeholder]", Quantum`Notation`zz020TPNotationini, Editable -> 
+        True, Selectable -> True], 
+       TagBox[
+       "\[Placeholder]", Quantum`Notation`zz020TPNotationend, Editable -> 
+        True, Selectable -> True]], 
+      TagBox[
+      "\[Placeholder]", Quantum`Notation`zz020TPNotationdat, Editable -> True,
+        Selectable -> True]}], Quantum`Notation`zz020TPNotation, Editable -> 
+    False, Selectable -> False], "qqbra" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qqft" -> 
+  SubscriptBox["\[ScriptCapitalQ]\[ScriptCapitalF]\[ScriptCapitalT]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "qqg" -> 
+  SubscriptBox["\[Placeholder]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "qqket" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qqketbra" -> RowBox[{
+     TagBox[
+      RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+      Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}], "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+      Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}]}], "qqqbra" -> TagBox[
+    RowBox[{"\[LeftAngleBracket]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+    Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qqqft" -> 
+  SubscriptBox["\[ScriptCapitalQ]\[ScriptCapitalF]\[ScriptCapitalT]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "qqqg" -> 
+  SubscriptBox["\[Placeholder]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "qqqket" -> TagBox[
+    RowBox[{"\[VerticalSeparator]", 
+      TagBox[
+       RowBox[{
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]], ",", 
+         SubscriptBox["\[Placeholder]", 
+          OverscriptBox["\[Placeholder]", "^"]]}], 
+       Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+       BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+    Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+    BaseStyle -> {ShowSyntaxStyles -> False}], "qqqketbra" -> RowBox[{
+     TagBox[
+      RowBox[{"\[VerticalSeparator]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[RightAngleBracket]"}], 
+      Quantum`Notation`zz080Ket, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}], "\[CenterDot]", 
+     TagBox[
+      RowBox[{"\[LeftAngleBracket]", 
+        TagBox[
+         RowBox[{
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]], ",", 
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["\[Placeholder]", "^"]]}], 
+         Quantum`Notation`zz080BraArgs, Editable -> True, Selectable -> True, 
+         BaseStyle -> {ShowSyntaxStyles -> True}], "\[VerticalSeparator]"}], 
+      Quantum`Notation`zz080Bra, Editable -> False, Selectable -> False, 
+      BaseStyle -> {ShowSyntaxStyles -> False}]}], "qqqqft" -> 
+  SubscriptBox["\[ScriptCapitalQ]\[ScriptCapitalF]\[ScriptCapitalT]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "qqqqqft" -> 
+  SubscriptBox["\[ScriptCapitalQ]\[ScriptCapitalF]\[ScriptCapitalT]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "qr" -> 
+  RowBox[{"\[ScriptCapitalR]\[ScriptE]\[ScriptG]\[ScriptI]\[ScriptS]\[ScriptT]\
+\[ScriptE]\[ScriptR]", "[", "\[Placeholder]", "]"}], "qrg" -> 
+  SubscriptBox["\[Placeholder]", 
+    RowBox[{
+     "\[ScriptCapitalR]\[ScriptE]\[ScriptG]\[ScriptI]\[ScriptS]\[ScriptT]\
+\[ScriptE]\[ScriptR]", "[", "\[Placeholder]", "]"}]], "qs" -> RowBox[{
+     UnderoverscriptBox["\[Sum]", "\[Placeholder]", "\[Placeholder]"], 
+     "\[Placeholder]"}], "qv" -> SubscriptBox["\[Placeholder]", 
+    OverscriptBox["\[Placeholder]", "^"]], "s0" -> SubscriptBox["\[Sigma]", 
+    RowBox[{"0", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "s1" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"1", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "s2" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"2", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "s3" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"3", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "s4" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"4", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "sg" -> 
+  SubscriptBox["\[ScriptCapitalS]", 
+    OverscriptBox["\[Placeholder]", "^"]], "sgg" -> 
+  SubscriptBox["\[ScriptCapitalS]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "sggg" -> 
+  SubscriptBox["\[ScriptCapitalS]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "si" -> RowBox[{
+     UnderoverscriptBox["\[Sum]", "\[Placeholder]", "\[Placeholder]"], 
+     "\[Placeholder]"}], "sn" -> 
+  SubscriptBox["\[ScriptCapitalS]", "\[Placeholder]"], "so" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptZero]", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "sO" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptZero]", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "sp" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"\[Placeholder]", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "su" -> 
+  SubscriptBox["\[Placeholder]", "\[Placeholder]"], "swap" -> 
+  SubscriptBox[
+   "\[ScriptCapitalS]\[ScriptCapitalW]\[ScriptCapitalA]\[ScriptCapitalP]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "sx" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalX]", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "sy" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalY]", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "sz" -> 
+  SubscriptBox["\[Sigma]", 
+    RowBox[{"\[ScriptCapitalZ]", ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "tg" -> 
+  SubscriptBox["\[ScriptCapitalT]", 
+    OverscriptBox["\[Placeholder]", "^"]], "tgg" -> 
+  SubscriptBox["\[ScriptCapitalT]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "tggg" -> 
+  SubscriptBox["\[ScriptCapitalT]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "tn" -> 
+  SubscriptBox["\[ScriptCapitalT]", "\[Placeholder]"], "toff" -> 
+  SubscriptBox[
+   "\[ScriptCapitalT]\[ScriptCapitalO]\[ScriptCapitalF]\[ScriptCapitalF]\
+\[ScriptCapitalO]\[ScriptCapitalL]\[ScriptCapitalI]", 
+    RowBox[{
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"], ",", 
+      OverscriptBox["\[Placeholder]", "^"]}]], "toqb" -> SubscriptBox[
+    TagBox[
+     RowBox[{"\[VerticalSeparator]", 
+       TagBox[
+       "\[Placeholder]", Quantum`Notation`zz080KetArgs, Editable -> True, 
+        Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+       "\[RightAngleBracket]"}], Quantum`Notation`zz080Ket, Editable -> False,
+      Selectable -> False, BaseStyle -> {ShowSyntaxStyles -> False}], 
+    "\[Placeholder]"], "tp" -> "\[CircleTimes]", "tpow" -> TagBox[
+    SuperscriptBox[
+     RowBox[{"(", 
+       TagBox[
+       "\[Placeholder]", Quantum`Computing`zz020TPdat, Editable -> True, 
+        Selectable -> True], ")"}], 
+     RowBox[{
+       AdjustmentBox["\[CircleTimes]", BoxBaselineShift -> Rational[-3, 4]], 
+       TagBox[
+       "\[Placeholder]", Quantum`Computing`zz020TPend, Editable -> True, 
+        Selectable -> True]}]], Quantum`Computing`zz020TP, Editable -> False, 
+    Selectable -> False], "tpowqb" -> TagBox[
+    SuperscriptBox[
+     RowBox[{"(", 
+       TagBox[
+        TagBox[
+         RowBox[{"\[VerticalSeparator]", 
+           TagBox[
+            RowBox[{
+              SubscriptBox["\[Placeholder]", 
+               OverscriptBox["\[Placeholder]", "^"]]}], 
+            Quantum`Notation`zz080KetArgs, Editable -> True, Selectable -> 
+            True, BaseStyle -> {ShowSyntaxStyles -> True}], 
+           "\[RightAngleBracket]"}], Quantum`Notation`zz080Ket, Editable -> 
+         False, Selectable -> False, 
+         BaseStyle -> {ShowSyntaxStyles -> False}], 
+        Quantum`Computing`zz020TPdat, Editable -> True, Selectable -> True], 
+       ")"}], 
+     RowBox[{
+       AdjustmentBox["\[CircleTimes]", BoxBaselineShift -> Rational[-3, 4]], 
+       TagBox[
+       "\[Placeholder]", Quantum`Computing`zz020TPend, Editable -> True, 
+        Selectable -> True]}]], Quantum`Computing`zz020TP, Editable -> False, 
+    Selectable -> False], "tprod" -> TagBox[
+    RowBox[{
+      UnderoverscriptBox["\[CircleTimes]", 
+       TagBox[
+        RowBox[{"\[Placeholder]", "=", "\[Placeholder]"}], 
+        Quantum`Notation`zz020TPNotationini, Editable -> True, Selectable -> 
+        True], 
+       TagBox[
+       "\[Placeholder]", Quantum`Notation`zz020TPNotationend, Editable -> 
+        True, Selectable -> True]], 
+      TagBox[
+      "\[Placeholder]", Quantum`Notation`zz020TPNotationdat, Editable -> True,
+        Selectable -> True]}], Quantum`Notation`zz020TPNotation, Editable -> 
+    False, Selectable -> False], "tprodqb" -> TagBox[
+    RowBox[{
+      UnderoverscriptBox["\[CircleTimes]", 
+       TagBox[
+        RowBox[{"n", "=", "\[Placeholder]"}], 
+        Quantum`Notation`zz020TPNotationini, Editable -> True, Selectable -> 
+        True], 
+       TagBox[
+       "\[Placeholder]", Quantum`Notation`zz020TPNotationend, Editable -> 
+        True, Selectable -> True]], 
+      TagBox[
+       TagBox[
+        RowBox[{"\[VerticalSeparator]", 
+          TagBox[
+           SubscriptBox["\[Placeholder]", 
+            OverscriptBox["n", "^"]], Quantum`Notation`zz080KetArgs, Editable -> 
+           True, Selectable -> True, BaseStyle -> {ShowSyntaxStyles -> True}],
+           "\[RightAngleBracket]"}], Quantum`Notation`zz080Ket, Editable -> 
+        False, Selectable -> False, BaseStyle -> {ShowSyntaxStyles -> False}],
+        Quantum`Notation`zz020TPNotationdat, Editable -> True, Selectable -> 
+       True]}], Quantum`Notation`zz020TPNotation, Editable -> False, 
+    Selectable -> False], "trace" -> RowBox[{
+     SubscriptBox["Tr", 
+      OverscriptBox["\[Placeholder]", "^"]], "[", "\[Placeholder]", "]"}], 
+  "xg" -> SubscriptBox["\[ScriptCapitalX]", 
+    OverscriptBox["\[Placeholder]", "^"]], "xgg" -> 
+  SubscriptBox["\[ScriptCapitalX]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "xggg" -> 
+  SubscriptBox["\[ScriptCapitalX]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "xn" -> 
+  SubscriptBox["\[ScriptCapitalX]", "\[Placeholder]"], "yg" -> 
+  SubscriptBox["\[ScriptCapitalY]", 
+    OverscriptBox["\[Placeholder]", "^"]], "ygg" -> 
+  SubscriptBox["\[ScriptCapitalY]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "yggg" -> 
+  SubscriptBox["\[ScriptCapitalY]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "yn" -> 
+  SubscriptBox["\[ScriptCapitalY]", "\[Placeholder]"], "zg" -> 
+  SubscriptBox["\[ScriptCapitalZ]", 
+    OverscriptBox["\[Placeholder]", "^"]], "zgg" -> 
+  SubscriptBox["\[ScriptCapitalZ]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "zggg" -> 
+  SubscriptBox["\[ScriptCapitalZ]", 
+    RowBox[{"{", 
+      RowBox[{
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"], ",", 
+        OverscriptBox["\[Placeholder]", "^"]}], "}"}]], "zn" -> 
+  SubscriptBox["\[ScriptCapitalZ]", "\[Placeholder]"]},
+Magnification:>FEPrivate`If[
+  FEPrivate`Equal[FEPrivate`$VersionNumber, 6.], 1.25, 1.25 Inherited],
+FrontEndVersion->"7.0 for Microsoft Windows (32-bit) (February 18, 2009)",
+StyleDefinitions->FrontEnd`FileName[{"Report"}, "StandardReport.nb", 
+  CharacterEncoding -> "WindowsANSI"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[567, 22, 655, 11, 302, "Title"],
+Cell[1225, 35, 504, 11, 76, "Text"],
+Cell[CellGroupData[{
+Cell[1754, 50, 96, 1, 91, "Section"],
+Cell[1853, 53, 1000, 16, 117, "Text"],
+Cell[2856, 71, 391, 9, 34, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3284, 85, 95, 1, 91, "Section"],
+Cell[3382, 88, 1523, 32, 202, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4942, 125, 97, 1, 113, "Section"],
+Cell[5042, 128, 429, 10, 95, "Text"],
+Cell[CellGroupData[{
+Cell[5496, 142, 248, 4, 58, "Input",
+ InitializationCell->True],
+Cell[5747, 148, 486, 7, 280, "Output"]
+}, Open  ]],
+Cell[6248, 158, 483, 10, 121, "Text"],
+Cell[6734, 170, 230, 5, 58, "Input",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7001, 180, 329, 4, 113, "Section"],
+Cell[7333, 186, 2145, 65, 77, "Text"],
+Cell[9481, 253, 3025, 90, 123, "Input",
+ InitializationCell->True],
+Cell[12509, 345, 589, 16, 75, "Text"],
+Cell[CellGroupData[{
+Cell[13123, 365, 783, 23, 68, "Input"],
+Cell[13909, 390, 574, 19, 68, "Output"]
+}, Open  ]],
+Cell[14498, 412, 245, 5, 68, "Text"],
+Cell[CellGroupData[{
+Cell[14768, 421, 732, 22, 68, "Input"],
+Cell[15503, 445, 72, 1, 58, "Output"]
+}, Open  ]],
+Cell[15590, 449, 365, 6, 68, "Text"],
+Cell[CellGroupData[{
+Cell[15980, 459, 235, 4, 58, "Input"],
+Cell[16218, 465, 8732, 272, 360, "Output"]
+}, Open  ]],
+Cell[24965, 740, 416, 7, 68, "Text"],
+Cell[CellGroupData[{
+Cell[25406, 751, 190, 4, 58, "Input"],
+Cell[25599, 757, 8732, 272, 360, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[34380, 1035, 315, 4, 113, "Section"],
+Cell[34698, 1041, 239, 4, 42, "Text"],
+Cell[CellGroupData[{
+Cell[34962, 1049, 120, 2, 58, "Input"],
+Cell[35085, 1053, 2247, 76, 90, "Output"]
+}, Open  ]],
+Cell[37347, 1132, 415, 9, 68, "Text"],
+Cell[CellGroupData[{
+Cell[37787, 1145, 221, 4, 61, "Input"],
+Cell[38011, 1151, 2457, 80, 91, "Output"]
+}, Open  ]],
+Cell[40483, 1234, 827, 20, 101, "Text"],
+Cell[CellGroupData[{
+Cell[41335, 1258, 865, 25, 68, "Input"],
+Cell[42203, 1285, 610, 20, 68, "Output"]
+}, Open  ]],
+Cell[42828, 1308, 237, 4, 68, "Text"],
+Cell[CellGroupData[{
+Cell[43090, 1316, 747, 23, 68, "Input"],
+Cell[43840, 1341, 72, 1, 58, "Output"]
+}, Open  ]],
+Cell[43927, 1345, 504, 11, 68, "Text"],
+Cell[CellGroupData[{
+Cell[44456, 1360, 247, 5, 63, "Input"],
+Cell[44706, 1367, 8732, 272, 360, "Output"]
+}, Open  ]],
+Cell[53453, 1642, 530, 11, 68, "Text"],
+Cell[CellGroupData[{
+Cell[54008, 1657, 223, 5, 63, "Input"],
+Cell[54234, 1664, 8734, 272, 360, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[63017, 1942, 105, 1, 113, "Section"],
+Cell[63125, 1945, 347, 7, 68, "Text"],
+Cell[CellGroupData[{
+Cell[63497, 1956, 162, 3, 58, "Input"],
+Cell[63662, 1961, 3736, 106, 120, "Output"]
+}, Open  ]],
+Cell[67413, 2070, 708, 14, 122, "Text"],
+Cell[CellGroupData[{
+Cell[68146, 2088, 473, 15, 65, "Input"],
+Cell[68622, 2105, 396, 11, 67, "Output"]
+}, Open  ]],
+Cell[69033, 2119, 506, 10, 70, "Text"],
+Cell[CellGroupData[{
+Cell[69564, 2133, 626, 18, 65, "Input"],
+Cell[70193, 2153, 70, 1, 58, "Output"]
+}, Open  ]],
+Cell[70278, 2157, 166, 3, 42, "Text"],
+Cell[CellGroupData[{
+Cell[70469, 2164, 656, 18, 65, "Input"],
+Cell[71128, 2184, 72, 1, 58, "Output"]
+}, Open  ]],
+Cell[71215, 2188, 171, 3, 42, "Text"],
+Cell[CellGroupData[{
+Cell[71411, 2195, 474, 15, 58, "Input"],
+Cell[71888, 2212, 72, 1, 58, "Output"]
+}, Open  ]],
+Cell[71975, 2216, 433, 12, 70, "Text"],
+Cell[CellGroupData[{
+Cell[72433, 2232, 500, 15, 58, "Input"],
+Cell[72936, 2249, 72, 1, 58, "Output"]
+}, Open  ]],
+Cell[73023, 2253, 882, 23, 68, "Text"],
+Cell[CellGroupData[{
+Cell[73930, 2280, 570, 15, 87, "Input"],
+Cell[74503, 2297, 17017, 476, 347, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[91569, 2779, 135, 1, 113, "Section"],
+Cell[91707, 2782, 349, 7, 68, "Text"],
+Cell[CellGroupData[{
+Cell[92081, 2793, 160, 3, 58, "Input"],
+Cell[92244, 2798, 3739, 106, 120, "Output"]
+}, Open  ]],
+Cell[95998, 2907, 831, 20, 103, "Text"],
+Cell[CellGroupData[{
+Cell[96854, 2931, 456, 12, 63, "Input"],
+Cell[97313, 2945, 400, 11, 67, "Output"]
+}, Open  ]],
+Cell[97728, 2959, 279, 7, 70, "Text"],
+Cell[CellGroupData[{
+Cell[98032, 2970, 493, 13, 63, "Input"],
+Cell[98528, 2985, 163, 4, 67, "Output"]
+}, Open  ]],
+Cell[98706, 2992, 965, 24, 103, "Text"],
+Cell[CellGroupData[{
+Cell[99696, 3020, 453, 13, 63, "Input"],
+Cell[100152, 3035, 402, 11, 67, "Output"]
+}, Open  ]],
+Cell[100569, 3049, 279, 7, 70, "Text"],
+Cell[CellGroupData[{
+Cell[100873, 3060, 542, 15, 63, "Input"],
+Cell[101418, 3077, 293, 8, 67, "Output"]
+}, Open  ]],
+Cell[101726, 3088, 612, 14, 68, "Text"],
+Cell[CellGroupData[{
+Cell[102363, 3106, 455, 13, 63, "Input"],
+Cell[102821, 3121, 431, 12, 67, "Output"]
+}, Open  ]],
+Cell[103267, 3136, 279, 7, 70, "Text"],
+Cell[CellGroupData[{
+Cell[103571, 3147, 544, 15, 63, "Input"],
+Cell[104118, 3164, 317, 9, 67, "Output"]
+}, Open  ]],
+Cell[104450, 3176, 612, 14, 68, "Text"],
+Cell[CellGroupData[{
+Cell[105087, 3194, 457, 13, 63, "Input"],
+Cell[105547, 3209, 464, 13, 67, "Output"]
+}, Open  ]],
+Cell[106026, 3225, 279, 7, 70, "Text"],
+Cell[CellGroupData[{
+Cell[106330, 3236, 542, 15, 63, "Input"],
+Cell[106875, 3253, 352, 10, 67, "Output"]
+}, Open  ]],
+Cell[107242, 3266, 612, 14, 68, "Text"],
+Cell[CellGroupData[{
+Cell[107879, 3284, 434, 13, 63, "Input"],
+Cell[108316, 3299, 466, 13, 67, "Output"]
+}, Open  ]],
+Cell[108797, 3315, 168, 3, 42, "Text"],
+Cell[CellGroupData[{
+Cell[108990, 3322, 513, 14, 63, "Input"],
+Cell[109506, 3338, 1324, 31, 88, "Output"]
+}, Open  ]],
+Cell[110845, 3372, 152, 3, 42, "Text"],
+Cell[CellGroupData[{
+Cell[111022, 3379, 559, 15, 63, "Input"],
+Cell[111584, 3396, 148, 4, 106, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[111781, 3406, 95, 1, 113, "Section"],
+Cell[111879, 3409, 1523, 32, 252, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[113439, 3446, 19, 0, 113, "Section"],
+Cell[113461, 3448, 504, 11, 95, "Text"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
