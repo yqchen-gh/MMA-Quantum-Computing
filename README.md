@@ -6,4 +6,4 @@ The package has Functions include Dirac Bra-Ket Notation, Quantum Algebra, Quant
 
 This work is done by [José Luis Gómez-Muñoz and Francisco Delgado](http://homepage.cem.itesm.mx/lgomez/quantum/)
 
-To install the package on your computer, see the [Installation Instructions](https://github.com/LeiChenQ/MMA-Quantum-Computing/blob/master/Installation%20Instructions.pdf)
+To install the package on your computer, see the [Installation Instructions](https://github.com/LeiChenQ/MMA-Quantum-Computing/blob/master/Installation%20Instructions.pdf).
